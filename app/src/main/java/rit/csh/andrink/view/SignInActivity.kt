@@ -43,6 +43,11 @@ class SignInActivity : AppCompatActivity() {
                 "AnDrink",
                 ResponseTypeValues.CODE,
                 "drink://redirect".toUri()
+            ).setScopes(
+                "openid",
+                "offline_access",
+                "profile",
+                "drink_balance"
             ).build()
 
             val authIntent = authService.getAuthorizationRequestIntent(req)
@@ -63,6 +68,7 @@ class SignInActivity : AppCompatActivity() {
         val error = AuthorizationException.fromIntent(intent)
 
         authState.update(response, error)
+        Log.i(TAG, authState.jsonSerializeString())
 
         authService.performTokenRequest(response!!.createTokenExchangeRequest()) { resp, ex ->
             authState.update(resp, ex)

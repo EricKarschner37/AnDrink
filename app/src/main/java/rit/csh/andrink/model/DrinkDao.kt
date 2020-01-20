@@ -9,11 +9,8 @@ import androidx.room.Query
 @Dao
 interface DrinkDao {
 
-    @Query("SELECT * from drink_table WHERE machine LIKE :machine_query")
+    @Query("SELECT * from drink_table WHERE machine LIKE :machine_query ORDER BY cost")
     fun getDrinksForMachine(machine_query: String): LiveData<List<Drink>>
-
-    @Query("SELECT * FROM drink_table ORDER BY machine ASC")
-    fun getAllDrinks(): LiveData<List<Drink>>
 
     @Query("DELETE FROM drink_table")
     suspend fun deleteAll()
