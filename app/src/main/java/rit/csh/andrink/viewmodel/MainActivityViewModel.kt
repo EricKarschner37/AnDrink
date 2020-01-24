@@ -1,20 +1,18 @@
 package rit.csh.andrink.viewmodel
 
 import android.app.Application
+import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.util.Log
+import android.provider.ContactsContract
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
-import rit.csh.andrink.model.Drink
-import rit.csh.andrink.model.DrinkRepository
-import rit.csh.andrink.model.DrinkRoomDatabase
-import rit.csh.andrink.model.NetworkManager
+import rit.csh.andrink.model.*
 
 class MainActivityViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository: DrinkRepository
+    private val drinkRepository: DrinkRepository
+    private val profileImageRepository: ProfileImageRepository
 
     val TAG = "MainActivityViewModel"
     val bigDrinks: LiveData<List<Drink>>
@@ -23,20 +21,21 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
 
     init {
         val drinkDao = DrinkRoomDatabase.getDatabase(application).drinkDao()
-        repository = DrinkRepository(drinkDao)
-        bigDrinks = repository.bigDrinks
-        littleDrinks = repository.littleDrinks
+        drinkRepository = DrinkRepository(drinkDao)
+        profileImageRepository = ProfileImageRepository(application)
+        bigDrinks = drinkRepository.bigDrinks
+        littleDrinks = drinkRepository.littleDrinks
         networkManager = NetworkManager(application)
     }
 
     fun refreshDrinks(token: String, onComplete: () -> Unit){
         networkManager.getDrinks(token) { drinks ->
-            GlobalScope.launch{
-                repository.deleteAll()
+            runBlocking{
+                drinkRepository.deleteAll()
             }
             for (drink in drinks) {
                 runBlocking{
-                    repository.insert(drink)
+                    drinkRepository.insert(drink)
                 }
                 onComplete.invoke()
             }
@@ -53,5 +52,9 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
 
     fun getDrinkCredits(token: String, uid: String, onComplete: (Int) -> Unit){
         networkManager.getDrinkCredits(token, uid, onComplete)
+    }
+
+    fun useUserProfileDrawable(uid: String, useDrawable: (Drawable) -> Unit){
+        profileImageRepository.useUserIconDrawable(uid, useDrawable)
     }
 }

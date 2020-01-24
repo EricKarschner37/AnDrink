@@ -10,7 +10,7 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONObject
 
-class NetworkManager(private val context: Context) {
+class NetworkManager(context: Context) {
     val TAG = "NetworkManager"
     val baseUrl = "https://drink.csh.rit.edu"
     val queue = Volley.newRequestQueue(context)
@@ -28,7 +28,7 @@ class NetworkManager(private val context: Context) {
                 onComplete(drinks)
             },
             Response.ErrorListener { error ->
-                Log.e(TAG, error.message ?: "There was an error with that request")
+                Log.e(TAG, error.message ?: "There was an error retrieving the drinks")
             }
         ) {
             override fun getHeaders(): Map<String, String> {
@@ -98,6 +98,7 @@ class NetworkManager(private val context: Context) {
             endPoint.toString(),
             null,
             Response.Listener{ response ->
+                Log.i(TAG, response.getString("preferred_username"))
                 onComplete.invoke(response.getString("preferred_username"))
             },
             Response.ErrorListener { error ->

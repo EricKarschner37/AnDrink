@@ -2,14 +2,21 @@ package rit.csh.andrink.view
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.squareup.picasso.Picasso
+import com.squareup.picasso.Target
 import kotlinx.android.synthetic.main.activity_main.*
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationService
@@ -19,6 +26,7 @@ import org.jetbrains.anko.yesButton
 import rit.csh.andrink.R
 import rit.csh.andrink.model.Drink
 import rit.csh.andrink.viewmodel.MainActivityViewModel
+import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,6 +37,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var littleDrinkFragment: LittleDrinkFragment
     private lateinit var bigDrinkFragment: BigDrinkFragment
     private lateinit var uid: String
+    private lateinit var image_url: String
     private lateinit var prefs: SharedPreferences
     private var credits = 0
 
@@ -38,6 +47,18 @@ class MainActivity : AppCompatActivity() {
         prefs = getSharedPreferences("auth", Context.MODE_PRIVATE)
         uid = prefs.getString("uid", "")!!
         credits = prefs.getInt("credits", 0)
+
+        viewModel = ViewModelProviders.of(this)
+            .get(MainActivityViewModel::class.java)
+
+        nav_view.setNavigationItemSelectedListener {
+
+            when (it.itemId) {
+                R.id.sign_out_menu -> Log.i(TAG, "sign out")
+            }
+
+            true
+        }
 
         littleDrinkFragment = LittleDrinkFragment{ confirmDropDrink(it) }
         bigDrinkFragment = BigDrinkFragment{ confirmDropDrink(it) }
@@ -53,21 +74,18 @@ class MainActivity : AppCompatActivity() {
         authState = readAuthState()
         authService = AuthorizationService(this)
 
-        viewModel = ViewModelProviders.of(this)
-            .get(MainActivityViewModel::class.java)
-
-        viewModel.bigDrinks.observe(this, Observer { drinks ->
-            bigDrinkFragment.setDrinks(drinks)
-        })
-
-        viewModel.littleDrinks.observe(this, Observer { drinks ->
-            littleDrinkFragment.setDrinks(drinks)
-        })
-
         drink_srl.isRefreshing = true
         refreshDrinkData()
         getDrinkCredits()
         getUserInfo()
+
+        viewModel.useUserProfileDrawable(uid) {drawable ->
+            toolbar.menu.findItem(R.id.action_profile)?.icon = drawable
+            setSupportActionBar(toolbar)
+            Log.i(TAG, "use drawable")
+        }
+
+        setSupportActionBar(toolbar)
     }
 
     private fun refreshDrinkData(){
@@ -76,6 +94,8 @@ class MainActivity : AppCompatActivity() {
                 Log.e("$TAG refresh", it.error ?: "there was an error retrieving tokens")
                 return@performActionWithFreshTokens
             }
+
+            Log.i(TAG, accessToken ?: " ")
             accessToken?.let { viewModel.refreshDrinks(it) {
                 drink_srl.isRefreshing = false
             } }
@@ -143,6 +163,18 @@ class MainActivity : AppCompatActivity() {
         } else {
             pager.currentItem--
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.toolbar, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean{
+        when (item.itemId) {
+            R.id.action_profile -> drawer.openDrawer(GravityCompat.END)
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     private inner class ScreenSlidePagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
