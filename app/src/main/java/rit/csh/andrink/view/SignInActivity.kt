@@ -48,7 +48,7 @@ class SignInActivity : AppCompatActivity() {
                 "offline_access",
                 "profile",
                 "drink_balance"
-            ).build()
+            ).setPrompt("login").build()
 
             val authIntent = authService.getAuthorizationRequestIntent(req)
             startActivityForResult(authIntent, RC_AUTH)
@@ -80,6 +80,7 @@ class SignInActivity : AppCompatActivity() {
     private fun readAuthState(): AuthState {
         val authPrefs = getSharedPreferences("auth", Context.MODE_PRIVATE)
         val stateJson = authPrefs.getString("stateJson", null)
+        Log.i(TAG, stateJson ?: "there is no previous login data")
         stateJson?.let {
             return AuthState.jsonDeserialize(stateJson)
         }

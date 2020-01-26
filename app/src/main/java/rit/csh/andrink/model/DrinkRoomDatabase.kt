@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 
 // Annotates class to be a Room Database with a table (entity) of the Word class
 @Database(entities = [Drink::class], version = 1, exportSchema = false)
@@ -26,7 +28,7 @@ abstract class DrinkRoomDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     DrinkRoomDatabase::class.java,
-                    "word_database"
+                    "drink_database"
                 ).build()
                 INSTANCE = instance
                 return instance

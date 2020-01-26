@@ -6,6 +6,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.util.Log
+import android.view.MenuItem
+import android.widget.ImageView
 import androidx.core.graphics.drawable.toDrawable
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
@@ -27,8 +29,7 @@ class ProfileImageRepository(private val context: Context) {
     fun useUserIconDrawable(uid: String, useDrawable: (Drawable) -> Unit){
         if (userHasImage(uid)){
             val file = File(directory, "ic_profile_$uid.jpg")
-            Log.i("UseImage", file.path)
-            val bitmap = BitmapFactory.decodeFile(file.path)
+            val bitmap = BitmapFactory.decodeFile(file.absolutePath)
             useDrawable.invoke(bitmap.toDrawable(context.resources))
         } else {
             Picasso.get().load("$baseImageUrl$uid").into(object: Target{
@@ -39,9 +40,9 @@ class ProfileImageRepository(private val context: Context) {
                 override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
                     bitmap?.let{
                         writeUserImageToFile(bitmap, uid)
+                        Log.i("Profile Image", "BitmapLoaded")
                         useDrawable.invoke(bitmap.toDrawable(context.resources))
                     }
-
                 }
             })
         }

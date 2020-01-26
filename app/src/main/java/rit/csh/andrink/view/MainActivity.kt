@@ -1,23 +1,29 @@
 package rit.csh.andrink.view
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import androidx.annotation.RequiresApi
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.nav_header.*
+import kotlinx.coroutines.runBlocking
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationService
 import org.jetbrains.anko.alert
@@ -36,25 +42,23 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: MainActivityViewModel
     private lateinit var littleDrinkFragment: LittleDrinkFragment
     private lateinit var bigDrinkFragment: BigDrinkFragment
-    private lateinit var uid: String
-    private lateinit var image_url: String
     private lateinit var prefs: SharedPreferences
-    private var credits = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        prefs = getSharedPreferences("auth", Context.MODE_PRIVATE)
-        uid = prefs.getString("uid", "")!!
-        credits = prefs.getInt("credits", 0)
 
         viewModel = ViewModelProviders.of(this)
             .get(MainActivityViewModel::class.java)
 
+        prefs = getSharedPreferences("auth", Context.MODE_PRIVATE)
+
+        viewModel.setUid(prefs.getString("uid", "")!!)
+        viewModel.setCredits(prefs.getInt("credits", 0))
+
         nav_view.setNavigationItemSelectedListener {
 
             when (it.itemId) {
-                R.id.sign_out_menu -> Log.i(TAG, "sign out")
             }
 
             true
@@ -73,19 +77,14 @@ class MainActivity : AppCompatActivity() {
 
         authState = readAuthState()
         authService = AuthorizationService(this)
+        getUserInfo()
 
         drink_srl.isRefreshing = true
         refreshDrinkData()
         getDrinkCredits()
-        getUserInfo()
-
-        viewModel.useUserProfileDrawable(uid) {drawable ->
-            toolbar.menu.findItem(R.id.action_profile)?.icon = drawable
-            setSupportActionBar(toolbar)
-            Log.i(TAG, "use drawable")
-        }
 
         setSupportActionBar(toolbar)
+
     }
 
     private fun refreshDrinkData(){
@@ -95,7 +94,6 @@ class MainActivity : AppCompatActivity() {
                 return@performActionWithFreshTokens
             }
 
-            Log.i(TAG, accessToken ?: " ")
             accessToken?.let { viewModel.refreshDrinks(it) {
                 drink_srl.isRefreshing = false
             } }
@@ -108,9 +106,7 @@ class MainActivity : AppCompatActivity() {
                 Log.e("TAG userInfo", it.error ?: "there was an error retrieving user info")
                 return@performActionWithFreshTokens
             }
-            accessToken?.let { viewModel.getUserInfo(it, authState.lastAuthorizationResponse!!.request.configuration.discoveryDoc!!.userinfoEndpoint!!) {uid ->
-                prefs.edit().putString("uid", uid).apply()
-            } }
+            accessToken?.let { viewModel.getUserInfo(it, authState.lastAuthorizationResponse!!.request.configuration.discoveryDoc!!.userinfoEndpoint!!) }
         }
     }
 
@@ -121,10 +117,7 @@ class MainActivity : AppCompatActivity() {
                 return@performActionWithFreshTokens
             }
             val uid = prefs.getString("uid", "")!!
-            accessToken?.let { viewModel.getDrinkCredits(it, uid) {credits ->
-                prefs.edit().putInt("credits", credits).apply()
-                Log.i(TAG, credits.toString())
-            } }
+            accessToken?.let { viewModel.getDrinkCredits(it, uid) }
         }
     }
 
@@ -157,6 +150,25 @@ class MainActivity : AppCompatActivity() {
         return AuthState()
     }
 
+    private fun signOut() {
+        val authPrefs = getSharedPreferences("auth", Context.MODE_PRIVATE)
+        val success = authPrefs.edit()
+            .clear()
+            .commit()
+
+        if (success){
+            val intent = Intent(this@MainActivity, SignInActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+    private fun setProfileImage(){
+        viewModel.useUserProfileDrawable(viewModel.uid.value!!) {drawable ->
+            toolbar.menu.getItem(0).icon = drawable
+            nav_profile_image.setImageDrawable(drawable.constantState?.newDrawable())
+        }
+    }
+
     override fun onBackPressed() {
         if (pager.currentItem == 0){
             super.onBackPressed()
@@ -167,6 +179,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.toolbar, menu)
+
+        setProfileImage()
+
+        viewModel.uid.observe(this, Observer { uid ->
+            nav_username_view.text = "User: $uid"
+            setProfileImage()
+        })
+
+        viewModel.credits.observe(this, Observer { credits ->
+            nav_credits_view.text = "Credits: $credits"
+        })
         return true
     }
 

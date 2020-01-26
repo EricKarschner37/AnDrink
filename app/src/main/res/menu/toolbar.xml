@@ -6,7 +6,7 @@
 
     <item
         android:id="@+id/action_profile"
-        android:icon="@drawable/ic_csh_logo_round"
+        android:icon="@drawable/ic_profile"
         android:title="Profile"
         app:showAsAction="always"/>
 

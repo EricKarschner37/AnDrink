@@ -3,6 +3,8 @@ package rit.csh.andrink.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.github.kittinunf.fuel.core.ResponseDeserializable
+import com.google.gson.Gson
 import org.json.JSONObject
 
 @Entity(tableName = "drink_table")
@@ -11,7 +13,8 @@ data class Drink(
     @ColumnInfo(name="label") val name: String,
     @ColumnInfo(name="cost") val cost: Int,
     @ColumnInfo(name="machine") val machine: String,
-    @ColumnInfo(name="slot") val slot: Int
+    @ColumnInfo(name="slot") val slot: Int,
+    @ColumnInfo(name="machineId") val machineId: Int
 )
 
 fun parseJsonToDrinks(json: JSONObject): List<Drink> {
@@ -28,7 +31,8 @@ fun parseJsonToDrinks(json: JSONObject): List<Drink> {
                 item.getString("name"),
                 item.getInt("price"),
                 machine.getString("name"),
-                item.getInt("id")
+                slot.getInt("number"),
+                machine.getInt("id")
             )
             if (drink.name != "Empty" && slot.getBoolean("active") && !slot.getBoolean("empty")) {
                 drinks.add(drink)

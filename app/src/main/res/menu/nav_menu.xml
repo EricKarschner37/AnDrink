@@ -1,16 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/big_drink_menu"
-        android:icon="@drawable/ic_profile"
-        android:title="Big Drink" />
-
-    <item android:id="@+id/little_drink_menu"
-        android:icon="@drawable/ic_profile"
-        android:title="Little Drink" />
-
-    <item android:id="@+id/sign_out_menu"
-        android:icon="@drawable/ic_profile"
-        android:title="Sign Out" />
-
 </menu>
