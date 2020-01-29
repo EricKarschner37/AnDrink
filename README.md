@@ -19,12 +19,12 @@ AnDrink currently supports base functionality for signing in with CSH credential
 **Viewing machines**
 
 The contents and statuses of the drink machines are shown on the main page of the application. 
-![Little Drink Stock](/images/little_drink.jpg) ![Big Drink Stock](/images/big_drink.jpg)
+<img src="images/little_drink.jpg" width="40%" height="40%"> <img src="images/big_drink.jpg" width="40%" height="40%">
 
 **Profile**
 
 The user's profile can be viewed, along with pertinent information (credits) from the sidepanel in the app.
-![Profile Tab](/images/profile_tab.jpg)
+<img src="images/profile_tab.jpg" width="40%" height="40%">
 
 ## Planned Features
 
