@@ -62,8 +62,7 @@ class MainActivity : AppCompatActivity() {
 
         drink_srl.setOnRefreshListener { refresh() }
 
-        pager.adapter = ScreenSlidePagerAdapter(supportFragmentManager)
-        tab_layout.setupWithViewPager(pager)
+        setupTabs()
 
         authState = readAuthState()
         authService = AuthorizationService(this)
@@ -88,7 +87,9 @@ class MainActivity : AppCompatActivity() {
                 return@performActionWithFreshTokens
             }
 
-            accessToken?.let { viewModel.refreshDrinks(it) { drink_srl.isRefreshing = false } }
+            accessToken?.let { viewModel.refreshDrinks(it) {
+                drink_srl.isRefreshing = false
+            } }
         }
     }
 
@@ -181,6 +182,11 @@ class MainActivity : AppCompatActivity() {
         }.show()
     }
 
+    private fun setupTabs(){
+        pager.adapter = ScreenSlidePagerAdapter(supportFragmentManager)
+        tab_layout.setupWithViewPager(pager)
+    }
+
     override fun onBackPressed() {
         if (pager.currentItem == 0){
             super.onBackPressed()
@@ -222,10 +228,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun getPageTitle(position: Int): CharSequence? {
-            return when (position) {
-                0 -> "Little Drink"
-                else -> "Big Drink"
-            }
+            return viewModel.machines.value!![position].displayName
         }
     }
 }

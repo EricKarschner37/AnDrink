@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.*
 import rit.csh.andrink.model.*
@@ -20,6 +21,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
     val TAG = "MainActivityViewModel"
     val bigDrink: Machine
     val littleDrink: Machine
+    val machines: MutableLiveData<List<Machine>>
     var uid = MutableLiveData<String>("")
     var credits = MutableLiveData(0)
     private val networkManager: NetworkManager
@@ -37,13 +39,15 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
             drinkRepository.bigDrinks,
             "bigdrink",
             "Big Drink",
-            MutableLiveData(Status.UNKNOWN))
+            Status.UNKNOWN)
 
         littleDrink = Machine(
             drinkRepository.littleDrinks,
-            "bigdrink",
-            "Big Drink",
-            MutableLiveData(Status.UNKNOWN))
+            "littledrink",
+            "Little Drink",
+            Status.UNKNOWN)
+
+        machines = MutableLiveData(listOf(littleDrink, bigDrink))
 
         uid = MutableLiveData(prefs.getString("uid", "")!!)
         credits = MutableLiveData(prefs.getInt("credits", 0))

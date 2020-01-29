@@ -30,23 +30,6 @@ class DrinkFragment(private val machine: Machine, private val onDrinkClicked: (D
             setDrinks(drinks)
         })
 
-        machine.status.observe(viewLifecycleOwner, Observer { status ->
-            when(status!!){
-                Status.UNKNOWN -> {
-                    status_view.text = "Unknown"
-                    status_view.background = resources.getColor(R.color.statusUnknown).toDrawable()
-                }
-                Status.ONLINE -> {
-                    status_view.text = "Online"
-                    status_view.background = resources.getColor(R.color.statusOnline).toDrawable()
-                }
-                Status.OFFLINE -> {
-                    status_view.text = "Offline"
-                    status_view.background = resources.getColor(R.color.statusOffline).toDrawable()
-                }
-            }
-        })
-
         drink_rv.adapter = DrinkAdapter(requireContext(), onDrinkClicked)
         drink_rv.layoutManager = LinearLayoutManager(requireContext())
     }
