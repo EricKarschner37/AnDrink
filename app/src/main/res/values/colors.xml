@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#B0197D</color>
+    <color name="colorPrimaryTrans">#D01F8D</color>
     <color name="colorPrimaryDark">#A01030</color>
     <color name="colorAccent">#E11C52</color>
+    <color name="statusUnknown">#AFAF00</color>
+    <color name="statusOnline">#6FBF00</color>
+    <color name="statusOffline">#BF1010</color>
 </resources>

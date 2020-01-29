@@ -14,7 +14,8 @@ data class Drink(
     @ColumnInfo(name="cost") val cost: Int,
     @ColumnInfo(name="machine") val machine: String,
     @ColumnInfo(name="slot") val slot: Int,
-    @ColumnInfo(name="machineId") val machineId: Int
+    @ColumnInfo(name="machineId") val machineId: Int,
+    @ColumnInfo(name="isStocked") val isActive: Boolean
 )
 
 fun parseJsonToDrinks(json: JSONObject): List<Drink> {
@@ -32,11 +33,10 @@ fun parseJsonToDrinks(json: JSONObject): List<Drink> {
                 item.getInt("price"),
                 machine.getString("name"),
                 slot.getInt("number"),
-                machine.getInt("id")
+                machine.getInt("id"),
+                !slot.getBoolean("empty") && slot.getBoolean("active")
             )
-            if (drink.name != "Empty" && slot.getBoolean("active") && !slot.getBoolean("empty")) {
-                drinks.add(drink)
-            }
+            drinks.add(drink)
         }
     }
 

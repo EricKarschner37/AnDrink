@@ -48,6 +48,11 @@ class ProfileImageRepository(private val context: Context) {
         }
     }
 
+    fun deleteUserIcon(uid: String){
+        val file = File(directory, "ic_profile_$uid.jpg")
+        file.delete()
+    }
+
     private fun userHasImage(uid: String): Boolean{
         val file = File(directory, "ic_profile_$uid.jpg")
         Log.i("User has image", file.exists().toString())

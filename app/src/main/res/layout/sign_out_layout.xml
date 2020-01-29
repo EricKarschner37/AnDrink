@@ -1,6 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?android:attr/selectableItemBackground">
+
+    <ImageView
+        android:layout_marginLeft="16dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:src="@drawable/ic_sign_out"
+        android:layout_gravity="center"/>
+
+    <TextView
+        android:layout_marginLeft="16dp"
+        android:textColor="#000000"
+        android:textSize="14sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:padding="16dp"
+        android:text="Sign out" />
 
 </LinearLayout>

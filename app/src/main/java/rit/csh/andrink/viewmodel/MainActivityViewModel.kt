@@ -5,11 +5,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.provider.ContactsContract
-import android.view.MenuItem
-import android.widget.ImageView
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.*
 import rit.csh.andrink.model.*
@@ -21,26 +18,46 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
     private val prefs: SharedPreferences
 
     val TAG = "MainActivityViewModel"
-    val bigDrinks: LiveData<List<Drink>>
-    val littleDrinks: LiveData<List<Drink>>
+    val bigDrink: Machine
+    val littleDrink: Machine
     var uid = MutableLiveData<String>("")
     var credits = MutableLiveData(0)
     private val networkManager: NetworkManager
+    var onErrorListener = object: OnErrorListener{
+        override fun onError(errorCode: Int) { Log.i(TAG, "OnErrorListener must be set in MainActivity") }
+    }
 
     init {
         val drinkDao = DrinkRoomDatabase.getDatabase(application).drinkDao()
         drinkRepository = DrinkRepository(drinkDao)
         profileImageRepository = ProfileImageRepository(application)
         prefs = application.getSharedPreferences("auth", Context.MODE_PRIVATE)
-        bigDrinks = drinkRepository.bigDrinks
-        littleDrinks = drinkRepository.littleDrinks
+
+        bigDrink = Machine(
+            drinkRepository.bigDrinks,
+            "bigdrink",
+            "Big Drink",
+            MutableLiveData(Status.UNKNOWN))
+
+        littleDrink = Machine(
+            drinkRepository.littleDrinks,
+            "bigdrink",
+            "Big Drink",
+            MutableLiveData(Status.UNKNOWN))
+
         uid = MutableLiveData(prefs.getString("uid", "")!!)
         credits = MutableLiveData(prefs.getInt("credits", 0))
-        networkManager = NetworkManager(application)
+        networkManager = NetworkManager(application) { onErrorListener.onError(it) }
+    }
+
+    fun getAuthString(): String{
+        return prefs.getString("stateJson", "")!!
     }
 
     fun refreshDrinks(token: String, onComplete: () -> Unit){
-        networkManager.getDrinks(token) { drinks ->
+        networkManager.getDrinks(token) { drinks, bigOnline, littleOnline ->
+            bigDrink.setStatus(bigOnline)
+            littleDrink.setStatus(littleOnline)
             runBlocking{
                 drinkRepository.deleteAll()
             }
@@ -63,27 +80,39 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         networkManager.dropItem(token, drink, onComplete)
     }
 
-    fun getDrinkCredits(token: String, uid: String){
-        networkManager.getDrinkCredits(token, uid) { newCredits ->
+    fun getDrinkCredits(token: String){
+        networkManager.getDrinkCredits(token, uid.value ?: "") { newCredits ->
             setCredits(newCredits)
         }
     }
 
-    fun useUserProfileDrawable(uid: String, useDrawable: (Drawable) -> Unit){
-        profileImageRepository.useUserIconDrawable(uid, useDrawable)
+    fun useUserProfileDrawable(useDrawable: (Drawable) -> Unit){
+        profileImageRepository.useUserIconDrawable(uid.value!!, useDrawable)
     }
 
-    fun setUid(new: String) {
+    fun signOut(): Boolean {
+        profileImageRepository.deleteUserIcon(uid.value!!)
+
+        return prefs.edit()
+            .clear()
+            .commit()
+    }
+
+    private fun setUid(new: String) {
         uid.value = new
         prefs.edit()
             .putString("uid", new)
             .apply()
     }
 
-    fun setCredits(new: Int) {
+    private fun setCredits(new: Int) {
         credits.value = new
         prefs.edit()
             .putInt("credits", new)
             .apply()
+    }
+
+    interface OnErrorListener{
+        fun onError(errorCode: Int)
     }
 }

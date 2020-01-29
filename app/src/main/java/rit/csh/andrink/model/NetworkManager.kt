@@ -10,12 +10,16 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.result.Result
 import org.json.JSONObject
 
-class NetworkManager(context: Context) {
+class NetworkManager(context: Context, private val onError: (Int) -> Unit) {
     private val TAG = "NetworkManager"
     private val baseUrl = "https://drink.csh.rit.edu"
     private val mainHandler = Handler(context.mainLooper)
 
-    fun getDrinks(token: String, onComplete: (List<Drink>) -> Unit){
+    private fun verifyDeviceIsConnected(){
+
+    }
+
+    fun getDrinks(token: String, onComplete: (List<Drink>, Boolean, Boolean) -> Unit){
         val url = "$baseUrl/drinks"
 
         Log.i(TAG, "getDrinks")
@@ -31,8 +35,25 @@ class NetworkManager(context: Context) {
                     }
                     is Result.Success -> {
                         Log.i(TAG, String(response.data))
-                        val drinks = parseJsonToDrinks(JSONObject(String(response.data)))
-                        onComplete.invoke(drinks)
+                        val jsonResponse = JSONObject(String(response.data))
+                        val drinks = parseJsonToDrinks(jsonResponse)
+                        jsonResponse.getJSONArray("machines").let{
+                            if (it.getJSONObject(0).getString("name") == "bigdrink"){
+                                val runnable = Runnable {
+                                    onComplete.invoke(drinks,
+                                        it.getJSONObject(0).getBoolean("is_online"),
+                                        it.getJSONObject(1).getBoolean("is_online"))
+                                }
+                                mainHandler.post(runnable)
+                            } else {
+                                val runnable = {
+                                    onComplete.invoke(drinks,
+                                        it.getJSONObject(1).getBoolean("is_online"),
+                                        it.getJSONObject(0).getBoolean("is_online"))
+                                }
+                                mainHandler.post(runnable)
+                            }
+                        }
                     }
                 }
             }
@@ -53,7 +74,8 @@ class NetworkManager(context: Context) {
                 when (result){
                     is Result.Failure-> {
                         val ex = result.getException()
-                        Log.e(TAG, ex.message ?: "Something went wrong dropping $drink")
+                        val errorCode = JSONObject(String(ex.errorData)).getInt("errorCode")
+                        onError.invoke(errorCode)
                         Log.e(TAG, String(ex.errorData))
                     }
                     is Result.Success -> {

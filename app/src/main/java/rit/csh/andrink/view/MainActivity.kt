@@ -1,38 +1,28 @@
 package rit.csh.andrink.view
 
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
-import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import androidx.annotation.RequiresApi
-import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.squareup.picasso.Picasso
-import com.squareup.picasso.Target
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.nav_header.*
-import kotlinx.coroutines.runBlocking
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationService
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.noButton
+import org.jetbrains.anko.okButton
 import org.jetbrains.anko.yesButton
 import rit.csh.andrink.R
 import rit.csh.andrink.model.Drink
 import rit.csh.andrink.viewmodel.MainActivityViewModel
-import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,9 +30,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var authState: AuthState
     private lateinit var authService: AuthorizationService
     private lateinit var viewModel: MainActivityViewModel
-    private lateinit var littleDrinkFragment: LittleDrinkFragment
-    private lateinit var bigDrinkFragment: BigDrinkFragment
-    private lateinit var prefs: SharedPreferences
+    private lateinit var littleDrinkFragment: DrinkFragment
+    private lateinit var bigDrinkFragment: DrinkFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,26 +40,27 @@ class MainActivity : AppCompatActivity() {
         viewModel = ViewModelProviders.of(this)
             .get(MainActivityViewModel::class.java)
 
-        prefs = getSharedPreferences("auth", Context.MODE_PRIVATE)
+        viewModel.onErrorListener = object: MainActivityViewModel.OnErrorListener {
+            override fun onError(errorCode: Int) { handleError(errorCode) }
+        }
 
-        viewModel.setUid(prefs.getString("uid", "")!!)
-        viewModel.setCredits(prefs.getInt("credits", 0))
-
-        nav_view.setNavigationItemSelectedListener {
-
-            when (it.itemId) {
+        nav_view.setNavigationItemSelectedListener { item ->
+            when (item.itemId){
+                R.id.nav_refresh -> {
+                    refresh()
+                    drawer.closeDrawers()
+                    true
+                }
+                else -> true
             }
-
-            true
         }
 
-        littleDrinkFragment = LittleDrinkFragment{ confirmDropDrink(it) }
-        bigDrinkFragment = BigDrinkFragment{ confirmDropDrink(it) }
+        sign_out_layout.setOnClickListener { confirmSignOut() }
 
-        drink_srl.setOnRefreshListener {
-            refreshDrinkData()
-            getDrinkCredits()
-        }
+        littleDrinkFragment = DrinkFragment(viewModel.littleDrink){ verifyCanDropDrink(it) }
+        bigDrinkFragment = DrinkFragment(viewModel.bigDrink){ verifyCanDropDrink(it) }
+
+        drink_srl.setOnRefreshListener { refresh() }
 
         pager.adapter = ScreenSlidePagerAdapter(supportFragmentManager)
         tab_layout.setupWithViewPager(pager)
@@ -79,12 +69,16 @@ class MainActivity : AppCompatActivity() {
         authService = AuthorizationService(this)
         getUserInfo()
 
+        setSupportActionBar(toolbar)
+        supportActionBar?.setIcon(R.drawable.ic_csh_logo_round)
+
+        refresh()
+    }
+
+    private fun refresh(){
         drink_srl.isRefreshing = true
         refreshDrinkData()
         getDrinkCredits()
-
-        setSupportActionBar(toolbar)
-
     }
 
     private fun refreshDrinkData(){
@@ -94,9 +88,7 @@ class MainActivity : AppCompatActivity() {
                 return@performActionWithFreshTokens
             }
 
-            accessToken?.let { viewModel.refreshDrinks(it) {
-                drink_srl.isRefreshing = false
-            } }
+            accessToken?.let { viewModel.refreshDrinks(it) { drink_srl.isRefreshing = false } }
         }
     }
 
@@ -116,8 +108,17 @@ class MainActivity : AppCompatActivity() {
                 Log.e("TAG drinkCredits", it.error ?: "there was an error getting drink credits")
                 return@performActionWithFreshTokens
             }
-            val uid = prefs.getString("uid", "")!!
-            accessToken?.let { viewModel.getDrinkCredits(it, uid) }
+            accessToken?.let { viewModel.getDrinkCredits(it) }
+        }
+    }
+
+    private fun verifyCanDropDrink(drink: Drink){
+        if (!drink_srl.isRefreshing) {
+            if (viewModel.credits.value ?: 0 < drink.cost) {
+                alertNotEnoughCredits()
+            } else {
+                confirmDropDrink(drink)
+            }
         }
     }
 
@@ -142,31 +143,42 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun readAuthState(): AuthState {
-        val stateJson = prefs.getString("stateJson", null)
-        stateJson?.let {
-            return AuthState.jsonDeserialize(stateJson)
-        }
-        return AuthState()
+    private fun confirmSignOut(){
+        alert("Are you sure you want to sign out?"){
+            yesButton{ signOut() }
+            noButton { }
+        }.show()
     }
 
-    private fun signOut() {
-        val authPrefs = getSharedPreferences("auth", Context.MODE_PRIVATE)
-        val success = authPrefs.edit()
-            .clear()
-            .commit()
+    private fun readAuthState(): AuthState = AuthState.jsonDeserialize(viewModel.getAuthString())
 
-        if (success){
+
+    private fun signOut() {
+        if (viewModel.signOut()){
             val intent = Intent(this@MainActivity, SignInActivity::class.java)
             startActivity(intent)
         }
     }
 
     private fun setProfileImage(){
-        viewModel.useUserProfileDrawable(viewModel.uid.value!!) {drawable ->
+        viewModel.useUserProfileDrawable() {drawable ->
             toolbar.menu.getItem(0).icon = drawable
             nav_profile_image.setImageDrawable(drawable.constantState?.newDrawable())
         }
+    }
+
+    private fun handleError(code: Int){
+        drink_srl.isRefreshing = false
+        when (code){
+            402 -> alertNotEnoughCredits()
+            else -> Log.e(TAG, "Something went wrong. Error code $code")
+        }
+    }
+
+    private fun alertNotEnoughCredits(){
+        alert("You don't have enough credits for that"){
+            okButton {  }
+        }.show()
     }
 
     override fun onBackPressed() {
@@ -183,12 +195,12 @@ class MainActivity : AppCompatActivity() {
         setProfileImage()
 
         viewModel.uid.observe(this, Observer { uid ->
-            nav_username_view.text = "User: $uid"
+            nav_view.menu.findItem(R.id.nav_username_view)?.title = "User: $uid"
             setProfileImage()
         })
 
         viewModel.credits.observe(this, Observer { credits ->
-            nav_credits_view.text = "Credits: $credits"
+            nav_view.menu.findItem(R.id.nav_credits_view)?.title = "Credits: $credits"
         })
         return true
     }

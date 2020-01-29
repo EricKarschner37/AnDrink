@@ -11,7 +11,8 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:id="@+id/root">
 
         <androidx.appcompat.widget.Toolbar
             android:layout_width="match_parent"
@@ -41,7 +42,6 @@
                     android:layout_height="wrap_content" />
             </androidx.viewpager.widget.ViewPager>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
     </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView
@@ -52,11 +52,10 @@
         android:layout_gravity="end"
         android:id="@+id/nav_view">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|bottom"
-            android:text="Sign out" />
+        <include
+            android:id="@+id/sign_out_layout"
+            layout="@layout/sign_out_layout"/>
+
     </com.google.android.material.navigation.NavigationView>
 
 </androidx.drawerlayout.widget.DrawerLayout>

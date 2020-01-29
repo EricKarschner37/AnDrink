@@ -97,5 +97,7 @@ class SignInActivity : AppCompatActivity() {
     private fun launchMainActivity(){
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
+        authService.dispose()
+        finish()
     }
 }

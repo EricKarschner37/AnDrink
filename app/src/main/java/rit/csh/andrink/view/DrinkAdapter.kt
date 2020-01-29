@@ -1,15 +1,19 @@
 package rit.csh.andrink.view
 
 import android.content.Context
+import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.drink_item.view.*
 import rit.csh.andrink.R
 import rit.csh.andrink.model.Drink
 
-class DrinkAdapter internal constructor(context: Context, private val onDrinkClicked: (Drink) -> Unit) : RecyclerView.Adapter<DrinkAdapter.ViewHolder>() {
+class DrinkAdapter internal constructor(private val context: Context, private val onDrinkClicked: (Drink) -> Unit) : RecyclerView.Adapter<DrinkAdapter.ViewHolder>() {
 
     private val inflater = LayoutInflater.from(context)
     private var drinks = emptyList<Drink>()
@@ -24,9 +28,17 @@ class DrinkAdapter internal constructor(context: Context, private val onDrinkCli
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val drink = drinks[position]
         holder.nameView.text = drink.name
-        holder.costView.text = drink.cost.toString()
-        holder.dropButton.setOnClickListener {
-            onDrinkClicked.invoke(drink)
+        holder.costView.text = "${drink.cost} credits"
+        if (drink.isActive){
+            holder.dropButton.setOnClickListener {
+                onDrinkClicked.invoke(drink)
+            }
+        } else {
+            Log.i("DrinkAdapter", drink.toString())
+            holder.nameView.alpha = 0.25F
+            holder.costView.alpha = 0.25F
+            holder.dropButton.alpha = 0.25F
+            holder.dropButton.setOnClickListener {  }
         }
     }
 
