@@ -20,6 +20,9 @@ android {
                 "appAuthRedirectScheme": 'redirect'
         ]
     }
+    androidExtensions {
+        experimental = true
+    }
     buildTypes {
         release {
             minifyEnabled false

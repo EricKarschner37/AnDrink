@@ -13,18 +13,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".view.DropDrinkActivity"></activity>
-        <activity android:name=".view.SignInActivity">
+        <activity android:name=".view.RefreshActivity" />
+        <activity android:name=".view.LaunchActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".view.DropDrinkActivity" />
+        <activity android:name=".view.SignInActivity" />
         <activity
             android:name=".view.MainActivity"
             android:icon="@drawable/ic_csh_logo_round"
-            android:label="AnDrink"></activity>
+            android:label="AnDrink" />
         <activity
             android:name="net.openid.appauth.RedirectUriReceiverActivity"
             tools:node="replace">

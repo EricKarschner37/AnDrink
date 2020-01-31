@@ -4,19 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_gravity="center"
     android:gravity="center"
-    tools:context=".view.DropDrinkActivity">
+    tools:context=".view.RefreshActivity">
 
         <ProgressBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:id="@+id/drop_progress"/>
+            android:layout_gravity="center_horizontal" />
 
         <TextView
+            android:text="Loading drink data..."
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:id="@+id/drop_drink_tv" />
+            android:layout_gravity="center_horizontal"/>
 
 </LinearLayout>

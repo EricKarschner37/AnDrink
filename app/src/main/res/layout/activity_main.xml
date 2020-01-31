@@ -24,24 +24,18 @@
             android:id="@+id/toolbar"
             tools:targetApi="lollipop" />
 
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        <androidx.viewpager.widget.ViewPager
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/drink_srl"
-            android:padding="12dp">
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:id="@+id/pager">
 
-            <androidx.viewpager.widget.ViewPager
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tab_layout"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:id="@+id/pager">
+                android:layout_height="wrap_content" />
+        </androidx.viewpager.widget.ViewPager>
 
-                <com.google.android.material.tabs.TabLayout
-                    android:id="@+id/tab_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-            </androidx.viewpager.widget.ViewPager>
-        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView

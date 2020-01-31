@@ -1,22 +1,22 @@
 package rit.csh.andrink.model
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 
 @Dao
 interface DrinkDao {
 
-    @Query("SELECT * from drink_table WHERE machine LIKE :machine_query ORDER BY cost")
-    fun getDrinksForMachine(machine_query: String): LiveData<List<Drink>>
+    @Transaction
+    @Query("SELECT * FROM Machine")
+    fun getMachinesWithDrinks(): LiveData<List<MachineWithDrinks>>
 
-    @Query("DELETE FROM drink_table")
+    @Query("DELETE FROM Drink")
     suspend fun deleteAll()
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(drink: Drink)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(vararg drinks: Drink)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(vararg machines: Machine)
 
 }

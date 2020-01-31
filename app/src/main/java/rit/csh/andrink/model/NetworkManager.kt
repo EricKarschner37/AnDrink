@@ -10,16 +10,13 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.result.Result
 import org.json.JSONObject
 
-class NetworkManager(context: Context, private val onError: (Int) -> Unit) {
+class NetworkManager(context: Context) {
     private val TAG = "NetworkManager"
     private val baseUrl = "https://drink.csh.rit.edu"
     private val mainHandler = Handler(context.mainLooper)
 
-    private fun verifyDeviceIsConnected(){
 
-    }
-
-    fun getDrinks(token: String, onComplete: (List<Drink>, Boolean, Boolean) -> Unit){
+    fun getDrinks(token: String, onComplete: (JSONObject) -> Unit){
         val url = "$baseUrl/drinks"
 
         Log.i(TAG, "getDrinks")
@@ -36,24 +33,7 @@ class NetworkManager(context: Context, private val onError: (Int) -> Unit) {
                     is Result.Success -> {
                         Log.i(TAG, String(response.data))
                         val jsonResponse = JSONObject(String(response.data))
-                        val drinks = parseJsonToDrinks(jsonResponse)
-                        jsonResponse.getJSONArray("machines").let{
-                            if (it.getJSONObject(0).getString("name") == "bigdrink"){
-                                val runnable = Runnable {
-                                    onComplete.invoke(drinks,
-                                        it.getJSONObject(0).getBoolean("is_online"),
-                                        it.getJSONObject(1).getBoolean("is_online"))
-                                }
-                                mainHandler.post(runnable)
-                            } else {
-                                val runnable = {
-                                    onComplete.invoke(drinks,
-                                        it.getJSONObject(1).getBoolean("is_online"),
-                                        it.getJSONObject(0).getBoolean("is_online"))
-                                }
-                                mainHandler.post(runnable)
-                            }
-                        }
+                        onComplete.invoke(jsonResponse)
                     }
                 }
             }
@@ -74,8 +54,6 @@ class NetworkManager(context: Context, private val onError: (Int) -> Unit) {
                 when (result){
                     is Result.Failure-> {
                         val ex = result.getException()
-                        val errorCode = JSONObject(String(ex.errorData)).getInt("errorCode")
-                        onError.invoke(errorCode)
                         Log.e(TAG, String(ex.errorData))
                     }
                     is Result.Success -> {
@@ -129,5 +107,19 @@ class NetworkManager(context: Context, private val onError: (Int) -> Unit) {
                     }
                 }
             }
+    }
+
+    companion object {
+        @Volatile
+        private var INSTANCE: NetworkManager? = null
+
+        fun getInstance(context: Context): NetworkManager{
+            if (INSTANCE != null) {
+                return INSTANCE as NetworkManager
+            }
+            val instance = NetworkManager(context)
+            INSTANCE = instance
+            return instance
+        }
     }
 }

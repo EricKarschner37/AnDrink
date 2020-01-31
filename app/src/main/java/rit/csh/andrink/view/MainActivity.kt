@@ -30,8 +30,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var authState: AuthState
     private lateinit var authService: AuthorizationService
     private lateinit var viewModel: MainActivityViewModel
-    private lateinit var littleDrinkFragment: DrinkFragment
-    private lateinit var bigDrinkFragment: DrinkFragment
+    private val machineFragments = mutableListOf<DrinkFragment>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,10 +38,6 @@ class MainActivity : AppCompatActivity() {
 
         viewModel = ViewModelProviders.of(this)
             .get(MainActivityViewModel::class.java)
-
-        viewModel.onErrorListener = object: MainActivityViewModel.OnErrorListener {
-            override fun onError(errorCode: Int) { handleError(errorCode) }
-        }
 
         nav_view.setNavigationItemSelectedListener { item ->
             when (item.itemId){
@@ -55,71 +50,31 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        setupFragments()
+
+        viewModel.machinesWithDrinks.observe(this, Observer { machinesWithDrinks ->
+            setupFragments()
+        })
+
         sign_out_layout.setOnClickListener { confirmSignOut() }
 
-        littleDrinkFragment = DrinkFragment(viewModel.littleDrink){ verifyCanDropDrink(it) }
-        bigDrinkFragment = DrinkFragment(viewModel.bigDrink){ verifyCanDropDrink(it) }
-
-        drink_srl.setOnRefreshListener { refresh() }
-
-        setupTabs()
-
-        authState = readAuthState()
+        authState = viewModel.getAuthState()
         authService = AuthorizationService(this)
-        getUserInfo()
 
         setSupportActionBar(toolbar)
         supportActionBar?.setIcon(R.drawable.ic_csh_logo_round)
-
-        refresh()
     }
 
     private fun refresh(){
-        drink_srl.isRefreshing = true
-        refreshDrinkData()
-        getDrinkCredits()
-    }
-
-    private fun refreshDrinkData(){
-        authState.performActionWithFreshTokens(authService) { accessToken, _, ex ->
-            ex?.let{
-                Log.e("$TAG refresh", it.error ?: "there was an error retrieving tokens")
-                return@performActionWithFreshTokens
-            }
-
-            accessToken?.let { viewModel.refreshDrinks(it) {
-                drink_srl.isRefreshing = false
-            } }
-        }
-    }
-
-    private fun getUserInfo(){
-        authState.performActionWithFreshTokens(authService) { accessToken, _, ex ->
-            ex?.let{
-                Log.e("TAG userInfo", it.error ?: "there was an error retrieving user info")
-                return@performActionWithFreshTokens
-            }
-            accessToken?.let { viewModel.getUserInfo(it, authState.lastAuthorizationResponse!!.request.configuration.discoveryDoc!!.userinfoEndpoint!!) }
-        }
-    }
-
-    private fun getDrinkCredits(){
-        authState.performActionWithFreshTokens(authService) { accessToken, _, ex ->
-            ex?.let{
-                Log.e("TAG drinkCredits", it.error ?: "there was an error getting drink credits")
-                return@performActionWithFreshTokens
-            }
-            accessToken?.let { viewModel.getDrinkCredits(it) }
-        }
+        val intent = Intent(this, RefreshActivity::class.java)
+        startActivity(intent)
     }
 
     private fun verifyCanDropDrink(drink: Drink){
-        if (!drink_srl.isRefreshing) {
-            if (viewModel.credits.value ?: 0 < drink.cost) {
-                alertNotEnoughCredits()
-            } else {
-                confirmDropDrink(drink)
-            }
+        if (viewModel.credits < drink.cost) {
+            alertNotEnoughCredits()
+        } else {
+            confirmDropDrink(drink)
         }
     }
 
@@ -130,18 +85,11 @@ class MainActivity : AppCompatActivity() {
         }.show()
     }
 
-    private fun dropDrink(drink: Drink) {
-        Log.i(TAG, "Dropping $drink")
-        authState.performActionWithFreshTokens(authService) {accessToken, _, ex ->
-            ex?.let{
-                Log.e("TAG dropDrink", it.error ?: "there was an error dropping $drink")
-                return@performActionWithFreshTokens
-            }
-            viewModel.dropDrink(accessToken!!, drink){
-                refreshDrinkData()
-                getDrinkCredits()
-            }
-        }
+    private fun dropDrink(drink: Drink){
+        val intent = Intent(this, DropDrinkActivity::class.java)
+        intent.putExtra("drink", drink)
+        startActivity(intent)
+        finish()
     }
 
     private fun confirmSignOut(){
@@ -151,13 +99,11 @@ class MainActivity : AppCompatActivity() {
         }.show()
     }
 
-    private fun readAuthState(): AuthState = AuthState.jsonDeserialize(viewModel.getAuthString())
-
-
     private fun signOut() {
         if (viewModel.signOut()){
             val intent = Intent(this@MainActivity, SignInActivity::class.java)
             startActivity(intent)
+            finish()
         }
     }
 
@@ -169,7 +115,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleError(code: Int){
-        drink_srl.isRefreshing = false
         when (code){
             402 -> alertNotEnoughCredits()
             else -> Log.e(TAG, "Something went wrong. Error code $code")
@@ -182,9 +127,26 @@ class MainActivity : AppCompatActivity() {
         }.show()
     }
 
+    private fun setupFragments(){
+        viewModel.machinesWithDrinks.value?.let { machinesWithDrinks ->
+            for (machineWithDrinks in machinesWithDrinks){
+                val fragment = DrinkFragment(machineWithDrinks){ verifyCanDropDrink(it) }
+                machineFragments.add(fragment)
+            }
+            setupTabs()
+        }
+    }
+
     private fun setupTabs(){
         pager.adapter = ScreenSlidePagerAdapter(supportFragmentManager)
         tab_layout.setupWithViewPager(pager)
+
+        viewModel.machinesWithDrinks.value?.let{
+            for (index in it.indices){
+                Log.i(TAG, "$index: ${it[index]}")
+                tab_layout.getTabAt(index)?.setIcon(it[index].machine.getDrawableForStatus())
+            }
+        }
     }
 
     override fun onBackPressed() {
@@ -200,14 +162,11 @@ class MainActivity : AppCompatActivity() {
 
         setProfileImage()
 
-        viewModel.uid.observe(this, Observer { uid ->
-            nav_view.menu.findItem(R.id.nav_username_view)?.title = "User: $uid"
-            setProfileImage()
-        })
+        nav_view.menu.findItem(R.id.nav_credits_view)?.title = "Credits: ${viewModel.credits}"
+        nav_view.menu.findItem(R.id.nav_username_view)?.title = "User: ${viewModel.uid}"
 
-        viewModel.credits.observe(this, Observer { credits ->
-            nav_view.menu.findItem(R.id.nav_credits_view)?.title = "Credits: $credits"
-        })
+        setProfileImage()
+
         return true
     }
 
@@ -219,16 +178,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private inner class ScreenSlidePagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
-        override fun getCount(): Int = 2
+        override fun getCount(): Int = machineFragments.size
         override fun getItem(position: Int): Fragment {
-            return when (position) {
-                0 -> littleDrinkFragment
-                else -> bigDrinkFragment
-            }
+            return machineFragments[position]
         }
 
         override fun getPageTitle(position: Int): CharSequence? {
-            return viewModel.machines.value!![position].displayName
+            return machineFragments[position].pageTitle
         }
     }
 }

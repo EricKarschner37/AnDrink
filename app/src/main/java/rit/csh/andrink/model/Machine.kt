@@ -1,37 +1,32 @@
 package rit.csh.andrink.model
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.Relation
 import rit.csh.andrink.R
+
+data class MachineWithDrinks(
+    @Embedded val machine: Machine,
+    @Relation(
+        parentColumn = "name",
+        entityColumn = "machine"
+    )
+    val drinks: List<Drink>
+
+)
 
 @Entity
 data class Machine(
-    val drinks: LiveData<List<Drink>>,
     @PrimaryKey val name: String,
     val displayName: String,
-    var status: Status
-){
-    fun setStatus(isOnline: Boolean){
-        status = if (isOnline){
-            Status.ONLINE
+    val isOnline: Boolean
+) {
+    fun getDrawableForStatus(): Int{
+        return if (isOnline){
+            R.drawable.indicator_online
         } else {
-            Status.OFFLINE
+            R.drawable.indicator_offline
         }
     }
-}
-
-enum class Status{
-    ONLINE {
-        override val indicator: Int = R.drawable.indicator_online
-    },
-    OFFLINE {
-        override val indicator: Int = R.drawable.indicator_offline
-    },
-    UNKNOWN {
-        override val indicator: Int = R.drawable.indicator_unknown
-    };
-
-    abstract val indicator: Int
 }
