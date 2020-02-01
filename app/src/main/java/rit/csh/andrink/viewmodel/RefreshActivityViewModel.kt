@@ -15,8 +15,9 @@ class RefreshActivityViewModel(application: Application): AndroidViewModel(appli
 
     private val TAG = "RefreshVM"
     private val prefs = application.getSharedPreferences("auth", Context.MODE_PRIVATE)
-    private val networkManager = NetworkManager(application)
+    private val networkManager = NetworkManager.getInstance(application)
     private val drinkRepository: DrinkRepository
+    private val authManager = AuthRequestManager.getInstance(application)
 
     init {
         val drinkDao = DrinkRoomDatabase.getDatabase(application).drinkDao()
@@ -28,17 +29,20 @@ class RefreshActivityViewModel(application: Application): AndroidViewModel(appli
         return AuthState.jsonDeserialize(stateJson)
     }
 
-    fun retrieveUserInfo(token: String, endPoint: Uri){
-        networkManager.getUserInfo(token, endPoint){uid ->
-            setUid(uid)
+    fun retrieveUserInfo(){
+        authManager.makeRequest { token ->
+            networkManager.getUserInfo(token, authManager.getUserInfoEndpoint()){uid ->
+                setUid(uid)
 
-            networkManager.getDrinkCredits(token, uid) {
-                setCredits(it)
+                networkManager.getDrinkCredits(token, uid) {
+                    setCredits(it)
+                }
             }
         }
     }
 
     private fun setCredits(new: Int) {
+        Log.i(TAG, "Credits: $new")
         prefs.edit()
             .putInt("credits", new)
             .apply()
@@ -50,25 +54,27 @@ class RefreshActivityViewModel(application: Application): AndroidViewModel(appli
             .apply()
     }
 
-    fun getMachineData(token: String, onComplete: () -> Unit){
-        networkManager.getDrinks(token) { response ->
-            val machineJsonArray = response.getJSONArray("machines")
-            val machines = arrayOfNulls<Machine>(machineJsonArray.length())
-            val drinks = arrayListOf<Drink>()
-            for (index in 0 until machineJsonArray.length()){
-                val machineJson = machineJsonArray.getJSONObject(index)
-                drinks.addAll(Drink.parseJsonToDrinks(machineJson.getJSONArray("slots"), machineJson.getString("name")))
-                val machine = Machine(
-                    machineJson.getString("name"),
-                    machineJson.getString("display_name"),
-                    machineJson.getBoolean("is_online")
-                )
-                machines[index] = machine
+    fun getMachineData(onComplete: () -> Unit){
+        authManager.makeRequest { token ->
+            networkManager.getDrinks(token) { response ->
+                val machineJsonArray = response.getJSONArray("machines")
+                val machines = arrayOfNulls<Machine>(machineJsonArray.length())
+                val drinks = arrayListOf<Drink>()
+                for (index in 0 until machineJsonArray.length()){
+                    val machineJson = machineJsonArray.getJSONObject(index)
+                    drinks.addAll(Drink.parseJsonToDrinks(machineJson.getJSONArray("slots"), machineJson.getString("name")))
+                    val machine = Machine(
+                        machineJson.getString("name"),
+                        machineJson.getString("display_name"),
+                        machineJson.getBoolean("is_online")
+                    )
+                    machines[index] = machine
+                }
+                GlobalScope.launch {
+                    writeToDatabase(machines.requireNoNulls(), drinks.toTypedArray())
+                }
+                onComplete.invoke()
             }
-            GlobalScope.launch {
-                writeToDatabase(machines.requireNoNulls(), drinks.toTypedArray())
-            }
-            onComplete.invoke()
         }
     }
 

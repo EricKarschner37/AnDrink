@@ -25,7 +25,7 @@ class SignInActivity : AppCompatActivity() {
         authService = AuthorizationService(this)
 
         if (authState.isAuthorized) {
-            launchMainActivity()
+            launchRefreshActivity()
         } else {
             authenticate()
         }
@@ -73,7 +73,7 @@ class SignInActivity : AppCompatActivity() {
         authService.performTokenRequest(response!!.createTokenExchangeRequest()) { resp, ex ->
             authState.update(resp, ex)
             writeAuthState(authState)
-            launchMainActivity()
+            launchRefreshActivity()
         }
     }
 
@@ -94,8 +94,8 @@ class SignInActivity : AppCompatActivity() {
             .apply()
     }
 
-    private fun launchMainActivity(){
-        val intent = Intent(this, MainActivity::class.java)
+    private fun launchRefreshActivity(){
+        val intent = Intent(this, RefreshActivity::class.java)
         startActivity(intent)
         authService.dispose()
         finish()

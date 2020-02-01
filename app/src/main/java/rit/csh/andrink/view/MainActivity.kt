@@ -27,8 +27,6 @@ import rit.csh.andrink.viewmodel.MainActivityViewModel
 class MainActivity : AppCompatActivity() {
 
     private val TAG = "MainActivity"
-    private lateinit var authState: AuthState
-    private lateinit var authService: AuthorizationService
     private lateinit var viewModel: MainActivityViewModel
     private val machineFragments = mutableListOf<DrinkFragment>()
 
@@ -57,9 +55,6 @@ class MainActivity : AppCompatActivity() {
         })
 
         sign_out_layout.setOnClickListener { confirmSignOut() }
-
-        authState = viewModel.getAuthState()
-        authService = AuthorizationService(this)
 
         setSupportActionBar(toolbar)
         supportActionBar?.setIcon(R.drawable.ic_csh_logo_round)

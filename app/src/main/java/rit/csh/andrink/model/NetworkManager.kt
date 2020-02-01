@@ -10,11 +10,10 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.result.Result
 import org.json.JSONObject
 
-class NetworkManager(context: Context) {
+class NetworkManager private constructor(context: Context){
     private val TAG = "NetworkManager"
     private val baseUrl = "https://drink.csh.rit.edu"
     private val mainHandler = Handler(context.mainLooper)
-
 
     fun getDrinks(token: String, onComplete: (JSONObject) -> Unit){
         val url = "$baseUrl/drinks"
@@ -57,7 +56,11 @@ class NetworkManager(context: Context) {
                         Log.e(TAG, String(ex.errorData))
                     }
                     is Result.Success -> {
-                        onComplete.invoke()
+                        val runnable = Runnable {
+                            onComplete.invoke()
+                        }
+                        Log.i(TAG, "drop drink success")
+                        mainHandler.post(runnable)
                     }
                 }
             }
@@ -78,6 +81,7 @@ class NetworkManager(context: Context) {
                     is Result.Success -> {
                         val data = JSONObject(String(response.data))
                         val credits = data.getJSONObject("user").getInt("drinkBalance")
+                        Log.i(TAG, "${data.getJSONObject("user")}")
                         val runnable = Runnable {
                             onComplete.invoke(credits)
                         }

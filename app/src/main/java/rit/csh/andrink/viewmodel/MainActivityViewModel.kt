@@ -21,7 +21,6 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
     val machinesWithDrinks: LiveData<List<MachineWithDrinks>>
     var uid: String
     var credits: Int
-    private val networkManager: NetworkManager
 
     init {
         val drinkDao = DrinkRoomDatabase.getDatabase(application).drinkDao()
@@ -33,7 +32,6 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
 
         uid = prefs.getString("uid", "")!!
         credits = prefs.getInt("credits", 0)
-        networkManager = NetworkManager(application)
     }
 
     fun getAuthState(): AuthState {
