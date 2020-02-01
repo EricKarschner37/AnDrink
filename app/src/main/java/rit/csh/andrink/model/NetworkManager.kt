@@ -2,11 +2,13 @@ package rit.csh.andrink.model
 
 import android.content.Context
 import android.net.Uri
+import android.os.CancellationSignal
 import android.os.Handler
 import android.util.Log
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.authentication
 import com.github.kittinunf.fuel.core.extensions.jsonBody
+import com.github.kittinunf.fuel.core.requests.CancellableRequest
 import com.github.kittinunf.result.Result
 import org.json.JSONObject
 
@@ -15,12 +17,12 @@ class NetworkManager private constructor(context: Context){
     private val baseUrl = "https://drink.csh.rit.edu"
     private val mainHandler = Handler(context.mainLooper)
 
-    fun getDrinks(token: String, onComplete: (JSONObject) -> Unit){
+    fun getDrinks(token: String, onComplete: (JSONObject) -> Unit): CancellableRequest{
         val url = "$baseUrl/drinks"
 
         Log.i(TAG, "getDrinks")
 
-        Fuel.get(url)
+        return Fuel.get(url)
             .authentication()
             .bearer(token)
             .responseString { request, response, result ->
@@ -30,22 +32,22 @@ class NetworkManager private constructor(context: Context){
                         Log.e(TAG, ex.message ?: "There was an issue with retrieving the drinks")
                     }
                     is Result.Success -> {
-                        Log.i(TAG, String(response.data))
                         val jsonResponse = JSONObject(String(response.data))
+                        Log.i(TAG, jsonResponse.toString())
                         onComplete.invoke(jsonResponse)
                     }
                 }
             }
     }
 
-    fun dropItem(token: String, drink: Drink, onComplete: () -> Unit) {
+    fun dropItem(token: String, drink: Drink, onComplete: () -> Unit): CancellableRequest {
         val url = "$baseUrl/drinks/drop"
 
         val jsonBody = JSONObject()
         jsonBody.put("machine", drink.machine)
         jsonBody.put("slot", drink.slot)
 
-        Fuel.post(url)
+        return Fuel.post(url)
             .jsonBody(jsonBody.toString())
             .authentication()
             .bearer(token)
@@ -59,17 +61,16 @@ class NetworkManager private constructor(context: Context){
                         val runnable = Runnable {
                             onComplete.invoke()
                         }
-                        Log.i(TAG, "drop drink success")
                         mainHandler.post(runnable)
                     }
                 }
             }
     }
 
-    fun getDrinkCredits(token: String, uid: String, onComplete: (Int) -> Unit) {
+    fun getDrinkCredits(token: String, uid: String, onComplete: (Int) -> Unit): CancellableRequest {
         val url = "$baseUrl/users/credits?uid=$uid"
 
-        Fuel.get(url)
+        return Fuel.get(url)
             .authentication()
             .bearer(token)
             .responseString { request, response, result ->
@@ -81,7 +82,6 @@ class NetworkManager private constructor(context: Context){
                     is Result.Success -> {
                         val data = JSONObject(String(response.data))
                         val credits = data.getJSONObject("user").getInt("drinkBalance")
-                        Log.i(TAG, "${data.getJSONObject("user")}")
                         val runnable = Runnable {
                             onComplete.invoke(credits)
                         }
@@ -92,9 +92,8 @@ class NetworkManager private constructor(context: Context){
             }
     }
 
-    fun getUserInfo(token: String, endPoint: Uri, onComplete: (String) -> Unit) {
-
-        Fuel.get(endPoint.toString())
+    fun getUserInfo(token: String, endPoint: Uri, onComplete: (String) -> Unit): CancellableRequest {
+        return Fuel.get(endPoint.toString())
             .authentication()
             .bearer(token)
             .responseString { request, response, result ->

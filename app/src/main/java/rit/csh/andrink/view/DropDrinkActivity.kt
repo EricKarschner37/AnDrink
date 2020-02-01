@@ -48,7 +48,10 @@ class DropDrinkActivity : AppCompatActivity() {
     private fun dropSuccessful(drink: Drink){
         drop_progress.visibility = View.GONE
         drop_drink_tv.text = "${drink.name} successfully dropped!"
-        startRefresh()
+        GlobalScope.launch{
+            Thread.sleep(2000)
+            startRefresh()
+        }
     }
 
     private fun startRefresh(){

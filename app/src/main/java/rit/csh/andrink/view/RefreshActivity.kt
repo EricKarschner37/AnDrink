@@ -37,7 +37,12 @@ class RefreshActivity : AppCompatActivity() {
         viewModel.retrieveUserInfo()
     }
 
+    override fun onBackPressed() {
+        viewModel.cancelRefresh()
+        super.onBackPressed()
+    }
     override fun onPause() {
+        viewModel.cancelRefresh()
         super.onPause()
     }
 }

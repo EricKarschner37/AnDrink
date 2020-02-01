@@ -16,17 +16,12 @@ class RefreshActivityViewModel(application: Application): AndroidViewModel(appli
     private val TAG = "RefreshVM"
     private val prefs = application.getSharedPreferences("auth", Context.MODE_PRIVATE)
     private val networkManager = NetworkManager.getInstance(application)
-    private val drinkRepository: DrinkRepository
     private val authManager = AuthRequestManager.getInstance(application)
+    private val drinkRepository: DrinkRepository
 
     init {
         val drinkDao = DrinkRoomDatabase.getDatabase(application).drinkDao()
         drinkRepository = DrinkRepository(drinkDao)
-    }
-
-    fun getAuthState(): AuthState {
-        val stateJson = prefs.getString("stateJson", "")!!
-        return AuthState.jsonDeserialize(stateJson)
     }
 
     fun retrieveUserInfo(){
@@ -39,19 +34,6 @@ class RefreshActivityViewModel(application: Application): AndroidViewModel(appli
                 }
             }
         }
-    }
-
-    private fun setCredits(new: Int) {
-        Log.i(TAG, "Credits: $new")
-        prefs.edit()
-            .putInt("credits", new)
-            .apply()
-    }
-
-    private fun setUid(new: String) {
-        prefs.edit()
-            .putString("uid", new)
-            .apply()
     }
 
     fun getMachineData(onComplete: () -> Unit){
@@ -76,6 +58,22 @@ class RefreshActivityViewModel(application: Application): AndroidViewModel(appli
                 onComplete.invoke()
             }
         }
+    }
+
+    fun cancelRefresh(){
+        authManager.flushRequests()
+    }
+
+    private fun setCredits(new: Int) {
+        prefs.edit()
+            .putInt("credits", new)
+            .apply()
+    }
+
+    private fun setUid(new: String) {
+        prefs.edit()
+            .putString("uid", new)
+            .apply()
     }
 
     private suspend fun writeToDatabase(machines: Array<Machine>, drinks: Array<Drink>){
