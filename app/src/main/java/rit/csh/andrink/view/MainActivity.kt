@@ -1,11 +1,11 @@
 package rit.csh.andrink.view
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -14,12 +14,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.nav_header.*
-import net.openid.appauth.AuthState
-import net.openid.appauth.AuthorizationService
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.noButton
-import org.jetbrains.anko.okButton
-import org.jetbrains.anko.yesButton
+import org.jetbrains.anko.*
 import rit.csh.andrink.R
 import rit.csh.andrink.model.Drink
 import rit.csh.andrink.viewmodel.MainActivityViewModel
@@ -98,6 +93,7 @@ class MainActivity : AppCompatActivity() {
         if (viewModel.signOut()){
             val intent = Intent(this@MainActivity, SignInActivity::class.java)
             startActivity(intent)
+            toast("Successfully signed out")
             finish()
         }
     }
@@ -106,13 +102,6 @@ class MainActivity : AppCompatActivity() {
         viewModel.useUserProfileDrawable() {drawable ->
             toolbar.menu.getItem(0).icon = drawable
             nav_profile_image.setImageDrawable(drawable.constantState?.newDrawable())
-        }
-    }
-
-    private fun handleError(code: Int){
-        when (code){
-            402 -> alertNotEnoughCredits()
-            else -> Log.e(TAG, "Something went wrong. Error code $code")
         }
     }
 

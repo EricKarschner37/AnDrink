@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.lifecycle.ViewModelProviders
+import com.github.kittinunf.fuel.core.FuelError
 import kotlinx.android.synthetic.main.activity_drop_drink.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -14,6 +15,7 @@ import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationService
 import rit.csh.andrink.R
 import rit.csh.andrink.model.Drink
+import rit.csh.andrink.model.ResponseHandler
 import rit.csh.andrink.viewmodel.DropDrinkActivityViewModel
 
 class DropDrinkActivity : AppCompatActivity() {
@@ -40,14 +42,33 @@ class DropDrinkActivity : AppCompatActivity() {
     private fun dropDrink(drink: Drink) {
         Log.i(TAG, "Dropping $drink")
 
-        viewModel.dropDrink(drink) {
-            dropSuccessful(drink)
+        val handler = object: ResponseHandler<String>() {
+            override fun onSuccess(output: String) {
+                Log.i(TAG, "drop drink success")
+                dropSuccessful(drink)
+            }
+
+            override fun onFailure(error: FuelError) {
+                Log.i(TAG, error.message ?: "drop drink failure")
+                dropFailed(drink)
+            }
         }
+
+        viewModel.dropDrink(drink, handler)
     }
 
     private fun dropSuccessful(drink: Drink){
         drop_progress.visibility = View.GONE
         drop_drink_tv.text = "${drink.name} successfully dropped!"
+        GlobalScope.launch{
+            Thread.sleep(2000)
+            startRefresh()
+        }
+    }
+
+    private fun dropFailed(drink: Drink){
+        drop_progress.visibility = View.GONE
+        drop_drink_tv.text = "Sorry, something went wrong while dropping ${drink.name}"
         GlobalScope.launch{
             Thread.sleep(2000)
             startRefresh()

@@ -41,8 +41,4 @@ class RefreshActivity : AppCompatActivity() {
         viewModel.cancelRefresh()
         super.onBackPressed()
     }
-    override fun onPause() {
-        viewModel.cancelRefresh()
-        super.onPause()
-    }
 }

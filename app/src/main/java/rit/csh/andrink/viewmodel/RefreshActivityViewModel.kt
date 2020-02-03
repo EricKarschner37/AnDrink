@@ -6,9 +6,12 @@ import android.net.Uri
 import android.provider.Settings
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.github.kittinunf.fuel.core.FuelError
 import rit.csh.andrink.model.*
 import kotlinx.coroutines.*
 import net.openid.appauth.AuthState
+import org.json.JSONObject
 import kotlin.coroutines.CoroutineContext
 
 class RefreshActivityViewModel(application: Application): AndroidViewModel(application) {
@@ -25,43 +28,70 @@ class RefreshActivityViewModel(application: Application): AndroidViewModel(appli
     }
 
     fun retrieveUserInfo(){
-        authManager.makeRequest { token ->
-            networkManager.getUserInfo(token, authManager.getUserInfoEndpoint()){uid ->
-                setUid(uid)
+        val creditsHandler = object: ResponseHandler<Int>() {
+            override fun onSuccess(output: Int) {
+                setCredits(output)
+            }
 
-                networkManager.getDrinkCredits(token, uid) {
-                    setCredits(it)
+            override fun onFailure(error: FuelError) {
+                Log.e(TAG, error.message ?: "Something went wrong retrieving the user's credits")
+            }
+
+        }
+        authManager.makeRequest { token ->
+            val uidHandler = object: ResponseHandler<String>() {
+                override fun onSuccess(output: String) {
+                    setUid(output)
+                    networkManager.getDrinkCredits(token, output, creditsHandler)
+                }
+
+                override fun onFailure(error: FuelError) {
+                    Log.e(TAG, error.message ?: "Something went wrong retrieving the user id")
                 }
             }
+            networkManager.getUserInfo(token, authManager.getUserInfoEndpoint(), uidHandler)
         }
     }
 
     fun getMachineData(onComplete: () -> Unit){
-        authManager.makeRequest { token ->
-            networkManager.getDrinks(token) { response ->
-                val machineJsonArray = response.getJSONArray("machines")
-                val machines = arrayOfNulls<Machine>(machineJsonArray.length())
-                val drinks = arrayListOf<Drink>()
-                for (index in 0 until machineJsonArray.length()){
-                    val machineJson = machineJsonArray.getJSONObject(index)
-                    drinks.addAll(Drink.parseJsonToDrinks(machineJson.getJSONArray("slots"), machineJson.getString("name")))
-                    val machine = Machine(
-                        machineJson.getString("name"),
-                        machineJson.getString("display_name"),
-                        machineJson.getBoolean("is_online")
-                    )
-                    machines[index] = machine
-                }
-                GlobalScope.launch {
-                    writeToDatabase(machines.requireNoNulls(), drinks.toTypedArray())
+        val handler = object: ResponseHandler<JSONObject>() {
+
+            override fun onSuccess(output: JSONObject) {
+                val machineDrinksPair = parseMachineJson(output)
+                viewModelScope.launch{
+                    writeToDatabase(machineDrinksPair.first.requireNoNulls(), machineDrinksPair.second.toTypedArray())
                 }
                 onComplete.invoke()
             }
+
+            override fun onFailure(error: FuelError) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+        }
+        authManager.makeRequest { token ->
+            networkManager.getDrinks(token, handler)
         }
     }
 
     fun cancelRefresh(){
         authManager.flushRequests()
+    }
+
+    private fun parseMachineJson(input: JSONObject): Pair<Array<Machine?>, ArrayList<Drink>> {
+        val machineJsonArray = input.getJSONArray("machines")
+        val machines = arrayOfNulls<Machine>(machineJsonArray.length())
+        val drinks = arrayListOf<Drink>()
+        for (index in 0 until machineJsonArray.length()){
+            val machineJson = machineJsonArray.getJSONObject(index)
+            drinks.addAll(Drink.parseJsonToDrinks(machineJson.getJSONArray("slots"), machineJson.getString("name")))
+            val machine = Machine(
+                machineJson.getString("name"),
+                machineJson.getString("display_name"),
+                machineJson.getBoolean("is_online")
+            )
+            machines[index] = machine
+        }
+        return Pair(machines, drinks)
     }
 
     private fun setCredits(new: Int) {
