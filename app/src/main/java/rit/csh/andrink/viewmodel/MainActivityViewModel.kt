@@ -19,8 +19,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
 
     val TAG = "MainActivityViewModel"
     val machinesWithDrinks: LiveData<List<MachineWithDrinks>>
-    var uid: String
-    var credits: Int
+    val user: LiveData<User>
 
     init {
         val drinkDao = DrinkRoomDatabase.getDatabase(application).drinkDao()
@@ -29,24 +28,16 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         prefs = application.getSharedPreferences("auth", Context.MODE_PRIVATE)
 
         machinesWithDrinks = drinkRepository.machines
-
-        uid = prefs.getString("uid", "")!!
-        credits = prefs.getInt("credits", 0)
-    }
-
-    fun getAuthState(): AuthState {
-        return AuthState.jsonDeserialize(prefs.getString("stateJson", "")!!)
+        user = drinkRepository.user
     }
 
     fun useUserProfileDrawable(useDrawable: (Drawable) -> Unit){
-        profileImageRepository.useUserIconDrawable(uid, useDrawable)
+        user.value?.let{
+            profileImageRepository.useUserIconDrawable(user.value!!.uid, useDrawable)
+        }
     }
 
-    fun signOut(): Boolean {
-        profileImageRepository.deleteUserIcon(uid)
-
-        return prefs.edit()
-            .clear()
-            .commit()
-    }
+    fun signOut() = prefs.edit()
+        .clear()
+        .commit()
 }

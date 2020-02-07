@@ -6,17 +6,28 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import com.github.kittinunf.fuel.core.FuelError
 import net.openid.appauth.AuthState
-import rit.csh.andrink.model.AuthRequestManager
-import rit.csh.andrink.model.Drink
-import rit.csh.andrink.model.NetworkManager
-import rit.csh.andrink.model.ResponseHandler
+import org.json.JSONObject
+import rit.csh.andrink.model.*
 
 class DropDrinkActivityViewModel(application: Application): AndroidViewModel(application) {
 
+    val TAG = "DropDrinkVM"
     private val networkManager = NetworkManager.getInstance(application)
     private val authManager = AuthRequestManager.getInstance(application)
+    val eventAlert = EventAlert()
 
-    fun dropDrink(drink: Drink, handler: ResponseHandler<String>){
+    fun dropDrink(drink: Drink){
+        val handler = object: ResponseHandler() {
+            override fun onSuccess(output: JSONObject) {
+                Log.i(TAG, "Drink successfully dropped")
+                eventAlert.setEvent(Event.DROP_DRINK_END)
+            }
+
+            override fun onFailure(error: FuelError) {
+                Log.i(TAG, error.message ?: "Something went wrong dropping $drink")
+                eventAlert.setEvent(Event.DROP_DRINK_END)
+            }
+        }
         authManager.makeRequest { token ->
             networkManager.dropItem(token, drink, handler)
         }

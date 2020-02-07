@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.github.kittinunf.fuel.core.FuelError
 import kotlinx.android.synthetic.main.activity_drop_drink.*
@@ -15,6 +16,7 @@ import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationService
 import rit.csh.andrink.R
 import rit.csh.andrink.model.Drink
+import rit.csh.andrink.model.Event
 import rit.csh.andrink.model.ResponseHandler
 import rit.csh.andrink.viewmodel.DropDrinkActivityViewModel
 
@@ -28,36 +30,32 @@ class DropDrinkActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_drop_drink)
 
+        viewModel = ViewModelProviders.of(this).get(DropDrinkActivityViewModel::class.java)
+
         intent.getParcelableExtra<Drink>("drink")?.let{
             drink = it
         }
 
         drop_drink_tv.text = "Dropping your ${drink.name}..."
 
-        viewModel = ViewModelProviders.of(this).get(DropDrinkActivityViewModel::class.java)
+        viewModel.eventAlert.event.observe(this, Observer {
+            when (it){
+                Event.DROP_DRINK_END -> {
+                    dropSuccessful()
+                    viewModel.eventAlert.complete()
+                }
+            }
+        })
 
-        dropDrink(drink)
+        dropDrink()
     }
 
-    private fun dropDrink(drink: Drink) {
+    private fun dropDrink() {
         Log.i(TAG, "Dropping $drink")
-
-        val handler = object: ResponseHandler<String>() {
-            override fun onSuccess(output: String) {
-                Log.i(TAG, "drop drink success")
-                dropSuccessful(drink)
-            }
-
-            override fun onFailure(error: FuelError) {
-                Log.i(TAG, error.message ?: "drop drink failure")
-                dropFailed(drink)
-            }
-        }
-
-        viewModel.dropDrink(drink, handler)
+        viewModel.dropDrink(drink)
     }
 
-    private fun dropSuccessful(drink: Drink){
+    private fun dropSuccessful(){
         drop_progress.visibility = View.GONE
         drop_drink_tv.text = "${drink.name} successfully dropped!"
         GlobalScope.launch{
@@ -66,7 +64,7 @@ class DropDrinkActivity : AppCompatActivity() {
         }
     }
 
-    private fun dropFailed(drink: Drink){
+    private fun dropFailed(){
         drop_progress.visibility = View.GONE
         drop_drink_tv.text = "Sorry, something went wrong while dropping ${drink.name}"
         GlobalScope.launch{

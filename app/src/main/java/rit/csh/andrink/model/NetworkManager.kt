@@ -17,7 +17,7 @@ class NetworkManager private constructor(context: Context){
     private val baseUrl = "https://drink.csh.rit.edu"
     private val mainHandler = Handler(context.mainLooper)
 
-    fun getDrinks(token: String, handler: ResponseHandler<JSONObject>): CancellableRequest{
+    fun getDrinks(token: String, handler: ResponseHandler): CancellableRequest{
         val url = "$baseUrl/drinks"
 
         Log.i(TAG, "getDrinks")
@@ -42,7 +42,7 @@ class NetworkManager private constructor(context: Context){
             }
     }
 
-    fun dropItem(token: String, drink: Drink, handler: ResponseHandler<String>): CancellableRequest {
+    fun dropItem(token: String, drink: Drink, handler: ResponseHandler): CancellableRequest {
         val url = "$baseUrl/drinks/drop"
 
         val jsonBody = JSONObject()
@@ -61,7 +61,7 @@ class NetworkManager private constructor(context: Context){
                     }
                     is Result.Success -> {
                         val runnable = Runnable {
-                            handler.onSuccess(result.value)
+                            handler.onSuccess(JSONObject(String(response.data)))
                         }
                         mainHandler.post(runnable)
                     }
@@ -69,7 +69,7 @@ class NetworkManager private constructor(context: Context){
             }
     }
 
-    fun getDrinkCredits(token: String, uid: String, handler: ResponseHandler<Int>): CancellableRequest {
+    fun getDrinkCredits(token: String, uid: String, handler: ResponseHandler): CancellableRequest {
         val url = "$baseUrl/users/credits?uid=$uid"
 
         return Fuel.get(url)
@@ -82,9 +82,8 @@ class NetworkManager private constructor(context: Context){
                     }
                     is Result.Success -> {
                         val data = JSONObject(String(response.data))
-                        val credits = data.getJSONObject("user").getInt("drinkBalance")
                         val runnable = Runnable {
-                            handler.onSuccess(credits)
+                            handler.onSuccess(data)
                         }
                         mainHandler.post(runnable)
                     }
@@ -93,7 +92,7 @@ class NetworkManager private constructor(context: Context){
             }
     }
 
-    fun getUserInfo(token: String, endPoint: Uri, handler: ResponseHandler<String>): CancellableRequest {
+    fun getUserInfo(token: String, endPoint: Uri, handler: ResponseHandler): CancellableRequest {
         return Fuel.get(endPoint.toString())
             .authentication()
             .bearer(token)
@@ -105,7 +104,7 @@ class NetworkManager private constructor(context: Context){
                     is Result.Success -> {
                         val data = JSONObject(String(response.data))
                         val runnable = Runnable {
-                            handler.onSuccess(data.getString("preferred_username"))
+                            handler.onSuccess(data)
                         }
                         mainHandler.post(runnable)
                     }

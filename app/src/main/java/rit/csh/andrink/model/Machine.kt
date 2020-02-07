@@ -13,7 +13,6 @@ data class MachineWithDrinks(
         entityColumn = "machine"
     )
     val drinks: List<Drink>
-
 )
 
 @Entity
@@ -22,11 +21,10 @@ data class Machine(
     val displayName: String,
     val isOnline: Boolean
 ) {
-    fun getDrawableForStatus(): Int{
-        return if (isOnline){
+    fun getDrawableForStatus() =
+        if (isOnline){
             R.drawable.indicator_online
         } else {
             R.drawable.indicator_offline
         }
-    }
 }

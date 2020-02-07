@@ -53,6 +53,8 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(toolbar)
         supportActionBar?.setIcon(R.drawable.ic_csh_logo_round)
+
+
     }
 
     private fun refresh(){
@@ -61,7 +63,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun verifyCanDropDrink(drink: Drink){
-        if (viewModel.credits < drink.cost) {
+        if (viewModel.user.value!!.credits < drink.cost) {
             alertNotEnoughCredits()
         } else {
             confirmDropDrink(drink)
@@ -91,7 +93,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun signOut() {
         if (viewModel.signOut()){
-            val intent = Intent(this@MainActivity, SignInActivity::class.java)
+            val intent = Intent(this, LaunchActivity::class.java)
             startActivity(intent)
             toast("Successfully signed out")
             finish()
@@ -113,6 +115,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupFragments(){
         viewModel.machinesWithDrinks.value?.let { machinesWithDrinks ->
+            machineFragments.removeAll(machineFragments)
             for (machineWithDrinks in machinesWithDrinks){
                 val fragment = DrinkFragment(machineWithDrinks){ verifyCanDropDrink(it) }
                 machineFragments.add(fragment)
@@ -144,10 +147,17 @@ class MainActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.toolbar, menu)
 
-        setProfileImage()
+        viewModel.user.value?.let{
+            nav_view.menu.findItem(R.id.nav_credits_view)?.title = "Credits: ${it.credits}"
+            nav_view.menu.findItem(R.id.nav_username_view)?.title = "User: ${it.uid}"
+            setProfileImage()
+        }
 
-        nav_view.menu.findItem(R.id.nav_credits_view)?.title = "Credits: ${viewModel.credits}"
-        nav_view.menu.findItem(R.id.nav_username_view)?.title = "User: ${viewModel.uid}"
+        viewModel.user.observe(this, Observer {
+            nav_view.menu.findItem(R.id.nav_credits_view)?.title = "Credits: ${it.credits}"
+            nav_view.menu.findItem(R.id.nav_username_view)?.title = "User: ${it.uid}"
+            setProfileImage()
+        })
 
         setProfileImage()
 

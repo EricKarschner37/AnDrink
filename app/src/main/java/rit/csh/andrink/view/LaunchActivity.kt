@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.lifecycle.ViewModelProviders
+import kotlinx.android.synthetic.main.activity_launch.*
 import rit.csh.andrink.R
 import rit.csh.andrink.viewmodel.LaunchActivityViewModel
 
@@ -17,12 +18,18 @@ class LaunchActivity : AppCompatActivity() {
 
         viewModel = ViewModelProviders.of(this).get(LaunchActivityViewModel::class.java)
 
-        val intent = if (viewModel.userIsAuthorized()){
-            Intent(this, RefreshActivity::class.java)
-        } else {
-            Intent(this, SignInActivity::class.java)
-        }
+        if (viewModel.userIsAuthorized()) launchRefresh()
+        sign_in_btn.setOnClickListener { launchSignIn() }
+    }
 
+    private fun launchRefresh(){
+        val intent = Intent(this, RefreshActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+
+    private fun launchSignIn(){
+        val intent = Intent(this, SignInActivity::class.java)
         startActivity(intent)
         finish()
     }

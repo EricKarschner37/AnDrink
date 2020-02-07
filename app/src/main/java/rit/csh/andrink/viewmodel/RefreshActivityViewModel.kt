@@ -2,21 +2,18 @@ package rit.csh.andrink.viewmodel
 
 import android.app.Application
 import android.content.Context
-import android.net.Uri
-import android.provider.Settings
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.core.FuelError
 import rit.csh.andrink.model.*
 import kotlinx.coroutines.*
-import net.openid.appauth.AuthState
 import org.json.JSONObject
-import kotlin.coroutines.CoroutineContext
 
 class RefreshActivityViewModel(application: Application): AndroidViewModel(application) {
 
     private val TAG = "RefreshVM"
+    val eventAlert = EventAlert()
     private val prefs = application.getSharedPreferences("auth", Context.MODE_PRIVATE)
     private val networkManager = NetworkManager.getInstance(application)
     private val authManager = AuthRequestManager.getInstance(application)
@@ -28,9 +25,13 @@ class RefreshActivityViewModel(application: Application): AndroidViewModel(appli
     }
 
     fun retrieveUserInfo(){
-        val creditsHandler = object: ResponseHandler<Int>() {
-            override fun onSuccess(output: Int) {
-                setCredits(output)
+        lateinit var uid: String
+        val creditsHandler = object: ResponseHandler() {
+            override fun onSuccess(output: JSONObject) {
+                val user = User(uid, output.parseCreditsFromJson(), true)
+                viewModelScope.launch{
+                    writeUser(user)
+                }
             }
 
             override fun onFailure(error: FuelError) {
@@ -39,10 +40,10 @@ class RefreshActivityViewModel(application: Application): AndroidViewModel(appli
 
         }
         authManager.makeRequest { token ->
-            val uidHandler = object: ResponseHandler<String>() {
-                override fun onSuccess(output: String) {
-                    setUid(output)
-                    networkManager.getDrinkCredits(token, output, creditsHandler)
+            val uidHandler = object: ResponseHandler() {
+                override fun onSuccess(output: JSONObject) {
+                    uid = output.parseUidFromJson()
+                    networkManager.getDrinkCredits(token, uid, creditsHandler)
                 }
 
                 override fun onFailure(error: FuelError) {
@@ -53,19 +54,19 @@ class RefreshActivityViewModel(application: Application): AndroidViewModel(appli
         }
     }
 
-    fun getMachineData(onComplete: () -> Unit){
-        val handler = object: ResponseHandler<JSONObject>() {
+    fun getMachineData(){
+        val handler = object: ResponseHandler() {
 
             override fun onSuccess(output: JSONObject) {
                 val machineDrinksPair = parseMachineJson(output)
                 viewModelScope.launch{
                     writeToDatabase(machineDrinksPair.first.requireNoNulls(), machineDrinksPair.second.toTypedArray())
                 }
-                onComplete.invoke()
+                eventAlert.setEvent(Event.REFRESH_END)
             }
 
             override fun onFailure(error: FuelError) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                Log.i(TAG, error.message ?: "Something went wrong retrieving stock information")
             }
         }
         authManager.makeRequest { token ->
@@ -94,17 +95,11 @@ class RefreshActivityViewModel(application: Application): AndroidViewModel(appli
         return Pair(machines, drinks)
     }
 
-    private fun setCredits(new: Int) {
-        prefs.edit()
-            .putInt("credits", new)
-            .apply()
-    }
+    private fun JSONObject.parseCreditsFromJson() =
+        getJSONObject("user").getInt("drinkBalance")
 
-    private fun setUid(new: String) {
-        prefs.edit()
-            .putString("uid", new)
-            .apply()
-    }
+    private fun JSONObject.parseUidFromJson() =
+        getString("preferred_username")
 
     private suspend fun writeToDatabase(machines: Array<Machine>, drinks: Array<Drink>){
         drinkRepository.deleteAll()
@@ -119,5 +114,9 @@ class RefreshActivityViewModel(application: Application): AndroidViewModel(appli
 
     private suspend fun writeDrinks(drinks: Array<Drink>) {
         drinkRepository.insert(*drinks)
+    }
+
+    private suspend fun writeUser(user: User) {
+        drinkRepository.insert(user)
     }
 }

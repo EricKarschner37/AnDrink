@@ -3,11 +3,10 @@ package rit.csh.andrink.view
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import net.openid.appauth.AuthState
-import net.openid.appauth.AuthorizationService
 import rit.csh.andrink.R
+import rit.csh.andrink.model.Event
 import rit.csh.andrink.viewmodel.RefreshActivityViewModel
 
 class RefreshActivity : AppCompatActivity() {
@@ -20,17 +19,27 @@ class RefreshActivity : AppCompatActivity() {
         setContentView(R.layout.activity_refresh)
 
         viewModel = ViewModelProviders.of(this).get(RefreshActivityViewModel::class.java)
+        viewModel.eventAlert.event.observe(this, Observer {
+            when (it){
+                Event.REFRESH_END -> {
+                    launchMainActivity()
+                    viewModel.eventAlert.complete()
+                }
+            }
+        })
 
         retrieveMachineData()
         retrieveUserInfo()
     }
 
     private fun retrieveMachineData(){
-        viewModel.getMachineData {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
+        viewModel.getMachineData()
+    }
+
+    private fun launchMainActivity(){
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 
     private fun retrieveUserInfo(){

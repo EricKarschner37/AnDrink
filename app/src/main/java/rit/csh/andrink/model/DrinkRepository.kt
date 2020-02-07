@@ -1,10 +1,10 @@
 package rit.csh.andrink.model
 
-import androidx.lifecycle.LiveData
-
 class DrinkRepository(private val drinkDao: DrinkDao) {
 
     val machines = drinkDao.getMachinesWithDrinks()
+
+    val user = drinkDao.getCurrentUser()
 
     suspend fun insert(vararg drinks: Drink) {
         drinkDao.insert(*drinks)
@@ -14,7 +14,12 @@ class DrinkRepository(private val drinkDao: DrinkDao) {
         drinkDao.insert(*machines)
     }
 
+    suspend fun insert(user: User) {
+        drinkDao.insert(user)
+    }
+
     suspend fun deleteAll() {
-        drinkDao.deleteAll()
+        drinkDao.deleteDrinks()
+        drinkDao.deleteMachines()
     }
 }

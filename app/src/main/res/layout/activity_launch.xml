@@ -6,4 +6,41 @@
     android:layout_height="match_parent"
     tools:context=".view.LaunchActivity">
 
+    <Button
+        android:id="@+id/sign_in_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="72dp"
+        android:text="Sign in"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/welcome_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="72dp"
+        android:text="CSH Drink"
+        android:textAppearance="@style/HeaderTextStyle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="92dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/welcome_view"
+        android:padding="8dp"
+        android:id="@+id/par_view"
+        android:gravity="center"
+        android:text="Welcome! You don't appear to be signed in. If you're a member of CSH, press the button below to sign in to your account."
+        android:textSize="16sp"
+        android:typeface="sans"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
