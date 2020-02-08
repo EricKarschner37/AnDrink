@@ -1,10 +1,10 @@
-package rit.csh.andrink.model
+package rit.csh.drink.model
 
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Relation
-import rit.csh.andrink.R
+import rit.csh.drink.R
 
 data class MachineWithDrinks(
     @Embedded val machine: Machine,

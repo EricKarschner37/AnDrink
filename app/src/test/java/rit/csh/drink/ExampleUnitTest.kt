@@ -1,4 +1,4 @@
-package rit.csh.andrink
+package rit.csh.drink
 
 import org.junit.Test
 

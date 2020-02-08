@@ -1,14 +1,11 @@
-package rit.csh.andrink.model
+package rit.csh.drink.model
 
 import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.github.kittinunf.fuel.core.ResponseDeserializable
-import com.google.gson.Gson
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONArray
-import org.json.JSONObject
 
 @Entity
 @Parcelize

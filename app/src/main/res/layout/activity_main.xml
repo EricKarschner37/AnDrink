@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-        <variable name="viewModel" type="rit.csh.andrink.viewmodel.MainActivityViewModel" />
+        <variable name="viewModel" type="rit.csh.drink.viewmodel.MainActivityViewModel" />
     </data>
 
     <androidx.drawerlayout.widget.DrawerLayout

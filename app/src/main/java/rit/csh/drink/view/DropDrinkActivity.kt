@@ -1,4 +1,4 @@
-package rit.csh.andrink.view
+package rit.csh.drink.view
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -7,18 +7,13 @@ import android.util.Log
 import android.view.View
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.github.kittinunf.fuel.core.FuelError
 import kotlinx.android.synthetic.main.activity_drop_drink.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import net.openid.appauth.AuthState
-import net.openid.appauth.AuthorizationService
-import rit.csh.andrink.R
-import rit.csh.andrink.model.Drink
-import rit.csh.andrink.model.Event
-import rit.csh.andrink.model.ResponseHandler
-import rit.csh.andrink.viewmodel.DropDrinkActivityViewModel
+import rit.csh.drink.R
+import rit.csh.drink.model.Drink
+import rit.csh.drink.model.Event
+import rit.csh.drink.viewmodel.DropDrinkActivityViewModel
 
 class DropDrinkActivity : AppCompatActivity() {
 

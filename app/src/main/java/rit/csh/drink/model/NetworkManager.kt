@@ -1,11 +1,10 @@
-package rit.csh.andrink.model
+package rit.csh.drink.model
 
 import android.content.Context
 import android.net.Uri
 import android.os.Handler
 import android.util.Log
 import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.ResultHandler
 import com.github.kittinunf.fuel.core.extensions.authentication
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.CancellableRequest

@@ -1,4 +1,4 @@
-package rit.csh.andrink.model
+package rit.csh.drink.model
 
 import android.content.Context
 import android.net.Uri
@@ -6,7 +6,6 @@ import android.util.Log
 import com.github.kittinunf.fuel.core.requests.CancellableRequest
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationService
-import java.net.URI
 
 class AuthRequestManager private constructor(context: Context) {
 

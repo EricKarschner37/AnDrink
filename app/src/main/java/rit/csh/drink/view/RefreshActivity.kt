@@ -1,13 +1,13 @@
-package rit.csh.andrink.view
+package rit.csh.drink.view
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import rit.csh.andrink.R
-import rit.csh.andrink.model.Event
-import rit.csh.andrink.viewmodel.RefreshActivityViewModel
+import rit.csh.drink.R
+import rit.csh.drink.model.Event
+import rit.csh.drink.viewmodel.RefreshActivityViewModel
 
 class RefreshActivity : AppCompatActivity() {
 

@@ -1,4 +1,4 @@
-package rit.csh.andrink.view
+package rit.csh.drink.view
 
 import android.content.Intent
 import android.os.Bundle
@@ -15,9 +15,9 @@ import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.nav_header.*
 import org.jetbrains.anko.*
-import rit.csh.andrink.R
-import rit.csh.andrink.model.Drink
-import rit.csh.andrink.viewmodel.MainActivityViewModel
+import rit.csh.drink.R
+import rit.csh.drink.model.Drink
+import rit.csh.drink.viewmodel.MainActivityViewModel
 
 class MainActivity : AppCompatActivity() {
 

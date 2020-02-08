@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="rit.csh.andrink">
+    package="rit.csh.drink">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -13,17 +13,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".view.RefreshActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".view.LaunchActivity" android:screenOrientation="portrait">
+        <activity android:name="rit.csh.drink.view.RefreshActivity" android:screenOrientation="portrait"/>
+        <activity android:name="rit.csh.drink.view.LaunchActivity" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".view.DropDrinkActivity" android:screenOrientation="portrait"/>
-        <activity android:name=".view.SignInActivity" android:screenOrientation="portrait"/>
+        <activity android:name="rit.csh.drink.view.DropDrinkActivity" android:screenOrientation="portrait"/>
+        <activity android:name="rit.csh.drink.view.SignInActivity" android:screenOrientation="portrait"/>
         <activity
-            android:name=".view.MainActivity"
+            android:name="rit.csh.drink.view.MainActivity"
             android:icon="@drawable/ic_csh_logo_round"
             android:screenOrientation="portrait"
             android:label="Drink" />

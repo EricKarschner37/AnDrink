@@ -1,17 +1,14 @@
-package rit.csh.andrink.view
+package rit.csh.drink.view
 
 import android.content.Context
-import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.drink_item.view.*
-import rit.csh.andrink.R
-import rit.csh.andrink.model.Drink
+import rit.csh.drink.R
+import rit.csh.drink.model.Drink
 
 class DrinkAdapter internal constructor(private val context: Context, private val onDrinkClicked: (Drink) -> Unit) : RecyclerView.Adapter<DrinkAdapter.ViewHolder>() {
 

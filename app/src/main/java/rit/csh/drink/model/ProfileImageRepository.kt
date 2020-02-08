@@ -1,4 +1,4 @@
-package rit.csh.andrink.model
+package rit.csh.drink.model
 
 import android.content.Context
 import android.content.ContextWrapper
@@ -6,12 +6,10 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.util.Log
-import android.view.MenuItem
-import android.widget.ImageView
 import androidx.core.graphics.drawable.toDrawable
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
-import rit.csh.andrink.R
+import rit.csh.drink.R
 import java.io.File
 import java.io.FileOutputStream
 import java.lang.Exception

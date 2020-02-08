@@ -1,13 +1,11 @@
-package rit.csh.andrink.viewmodel
+package rit.csh.drink.viewmodel
 
 import android.app.Application
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import com.github.kittinunf.fuel.core.FuelError
-import net.openid.appauth.AuthState
 import org.json.JSONObject
-import rit.csh.andrink.model.*
+import rit.csh.drink.model.*
 
 class DropDrinkActivityViewModel(application: Application): AndroidViewModel(application) {
 

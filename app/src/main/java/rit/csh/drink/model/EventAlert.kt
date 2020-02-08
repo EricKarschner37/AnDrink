@@ -1,4 +1,4 @@
-package rit.csh.andrink.model
+package rit.csh.drink.model
 
 import androidx.lifecycle.MutableLiveData
 

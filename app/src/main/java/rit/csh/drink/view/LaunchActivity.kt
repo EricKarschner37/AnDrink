@@ -1,12 +1,12 @@
-package rit.csh.andrink.view
+package rit.csh.drink.view
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_launch.*
-import rit.csh.andrink.R
-import rit.csh.andrink.viewmodel.LaunchActivityViewModel
+import rit.csh.drink.R
+import rit.csh.drink.viewmodel.LaunchActivityViewModel
 
 class LaunchActivity : AppCompatActivity() {
 

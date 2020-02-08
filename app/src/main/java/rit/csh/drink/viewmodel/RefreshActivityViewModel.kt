@@ -1,4 +1,4 @@
-package rit.csh.andrink.viewmodel
+package rit.csh.drink.viewmodel
 
 import android.app.Application
 import android.content.Context
@@ -6,7 +6,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.core.FuelError
-import rit.csh.andrink.model.*
+import rit.csh.drink.model.*
 import kotlinx.coroutines.*
 import org.json.JSONObject
 

@@ -1,4 +1,4 @@
-package rit.csh.andrink.view
+package rit.csh.drink.view
 
 import android.content.Context
 import android.content.Intent
@@ -8,7 +8,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.core.net.toUri
 import net.openid.appauth.*
-import rit.csh.andrink.R
+import rit.csh.drink.R
 
 class SignInActivity : AppCompatActivity() {
 

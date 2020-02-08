@@ -1,15 +1,12 @@
-package rit.csh.andrink.viewmodel
+package rit.csh.drink.viewmodel
 
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import net.openid.appauth.AuthState
-import rit.csh.andrink.model.*
+import rit.csh.drink.model.*
 
 class MainActivityViewModel(application: Application) : AndroidViewModel(application) {
 

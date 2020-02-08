@@ -1,4 +1,4 @@
-package rit.csh.andrink.viewmodel
+package rit.csh.drink.viewmodel
 
 import android.app.Application
 import android.content.Context

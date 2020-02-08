@@ -1,11 +1,9 @@
-package rit.csh.andrink.model
+package rit.csh.drink.model
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
 
 // Annotates class to be a Room Database with a table (entity) of the Word class
 @Database(entities = [Drink::class, Machine::class, User::class], version = 1, exportSchema = false)
