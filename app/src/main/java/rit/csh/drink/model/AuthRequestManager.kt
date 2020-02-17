@@ -7,7 +7,7 @@ import com.github.kittinunf.fuel.core.requests.CancellableRequest
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationService
 
-class AuthRequestManager private constructor(context: Context) {
+class AuthRequestManager(context: Context, private val onFailure: () -> Unit) {
 
     private val TAG = "AuthRequest"
     private val requests = ArrayList<CancellableRequest>()
@@ -24,6 +24,7 @@ class AuthRequestManager private constructor(context: Context) {
         authState.performActionWithFreshTokens(authService) { accessToken, idToken, ex ->
             ex?.let {
                 Log.e(TAG, it.error ?: "something went wrong getting tokens")
+                onFailure.invoke()
                 return@performActionWithFreshTokens
             }
 
@@ -40,19 +41,4 @@ class AuthRequestManager private constructor(context: Context) {
     }
 
     fun getUserInfoEndpoint(): Uri = authState.lastAuthorizationResponse!!.request.configuration.discoveryDoc!!.userinfoEndpoint!!
-
-    companion object {
-        @Volatile
-        private var INSTANCE: AuthRequestManager? = null
-
-        fun getInstance(context: Context): AuthRequestManager {
-            return if (INSTANCE != null) {
-                INSTANCE!!
-            } else {
-                val instance = AuthRequestManager(context)
-                INSTANCE = instance
-                instance
-            }
-        }
-    }
 }

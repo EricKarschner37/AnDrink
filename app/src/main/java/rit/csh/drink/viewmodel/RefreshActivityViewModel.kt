@@ -1,7 +1,6 @@
 package rit.csh.drink.viewmodel
 
 import android.app.Application
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,19 +8,25 @@ import com.github.kittinunf.fuel.core.FuelError
 import rit.csh.drink.model.*
 import kotlinx.coroutines.*
 import org.json.JSONObject
+import rit.csh.drink.model.drink.Drink
+import rit.csh.drink.model.drink.DrinkRepository
+import rit.csh.drink.model.drink.DrinkRoomDatabase
+import rit.csh.drink.model.drink.Machine
 
 class RefreshActivityViewModel(application: Application): AndroidViewModel(application) {
 
     private val TAG = "RefreshVM"
     val eventAlert = EventAlert()
-    private val prefs = application.getSharedPreferences("auth", Context.MODE_PRIVATE)
     private val networkManager = NetworkManager.getInstance(application)
-    private val authManager = AuthRequestManager.getInstance(application)
+    private val authManager: AuthRequestManager
     private val drinkRepository: DrinkRepository
 
     init {
         val drinkDao = DrinkRoomDatabase.getDatabase(application).drinkDao()
         drinkRepository = DrinkRepository(drinkDao)
+        authManager = AuthRequestManager(application) {
+            eventAlert.setEvent(Event.ERROR)
+        }
     }
 
     fun retrieveUserInfo(){
@@ -37,8 +42,8 @@ class RefreshActivityViewModel(application: Application): AndroidViewModel(appli
             override fun onFailure(error: FuelError) {
                 Log.e(TAG, error.message ?: "Something went wrong retrieving the user's credits")
             }
-
         }
+
         authManager.makeRequest { token ->
             val uidHandler = object: ResponseHandler() {
                 override fun onSuccess(output: JSONObject) {

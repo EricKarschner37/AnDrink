@@ -4,7 +4,8 @@ import androidx.lifecycle.MutableLiveData
 
 enum class Event {
     REFRESH_END,
-    DROP_DRINK_END
+    DROP_DRINK_END,
+    ERROR
 }
 
 class EventAlert {

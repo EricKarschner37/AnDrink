@@ -1,9 +1,10 @@
-package rit.csh.drink.model
+package rit.csh.drink.model.drink
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import rit.csh.drink.model.User
 
 // Annotates class to be a Room Database with a table (entity) of the Word class
 @Database(entities = [Drink::class, Machine::class, User::class], version = 1, exportSchema = false)
@@ -18,7 +19,8 @@ abstract class DrinkRoomDatabase : RoomDatabase() {
         private var INSTANCE: DrinkRoomDatabase? = null
 
         fun getDatabase(context: Context): DrinkRoomDatabase {
-            val tempInstance = INSTANCE
+            val tempInstance =
+                INSTANCE
             if (tempInstance != null) {
                 return tempInstance
             }

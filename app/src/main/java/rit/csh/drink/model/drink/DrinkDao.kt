@@ -1,7 +1,8 @@
-package rit.csh.drink.model
+package rit.csh.drink.model.drink
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
+import rit.csh.drink.model.User
 
 @Dao
 interface DrinkDao {

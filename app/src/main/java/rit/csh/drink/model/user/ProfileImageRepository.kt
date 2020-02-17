@@ -1,4 +1,4 @@
-package rit.csh.drink.model
+package rit.csh.drink.model.user
 
 import android.content.Context
 import android.content.ContextWrapper

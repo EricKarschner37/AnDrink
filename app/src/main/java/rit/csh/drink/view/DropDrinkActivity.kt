@@ -11,7 +11,7 @@ import kotlinx.android.synthetic.main.activity_drop_drink.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import rit.csh.drink.R
-import rit.csh.drink.model.Drink
+import rit.csh.drink.model.drink.Drink
 import rit.csh.drink.model.Event
 import rit.csh.drink.viewmodel.DropDrinkActivityViewModel
 
@@ -37,6 +37,10 @@ class DropDrinkActivity : AppCompatActivity() {
             when (it){
                 Event.DROP_DRINK_END -> {
                     dropSuccessful()
+                    viewModel.eventAlert.complete()
+                }
+                Event.ERROR -> {
+                    dropFailed()
                     viewModel.eventAlert.complete()
                 }
             }

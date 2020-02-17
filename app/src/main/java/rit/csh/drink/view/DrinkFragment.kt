@@ -9,8 +9,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_drink.*
 import rit.csh.drink.R
-import rit.csh.drink.model.Drink
-import rit.csh.drink.model.MachineWithDrinks
+import rit.csh.drink.model.drink.Drink
+import rit.csh.drink.model.drink.MachineWithDrinks
 
 class DrinkFragment(private val machineWithDrinks: MachineWithDrinks, private val onDrinkClicked: (Drink) -> Unit) : Fragment() {
 

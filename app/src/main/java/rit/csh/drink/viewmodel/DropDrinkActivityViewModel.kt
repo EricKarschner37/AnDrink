@@ -6,13 +6,16 @@ import androidx.lifecycle.AndroidViewModel
 import com.github.kittinunf.fuel.core.FuelError
 import org.json.JSONObject
 import rit.csh.drink.model.*
+import rit.csh.drink.model.drink.Drink
 
 class DropDrinkActivityViewModel(application: Application): AndroidViewModel(application) {
 
     val TAG = "DropDrinkVM"
-    private val networkManager = NetworkManager.getInstance(application)
-    private val authManager = AuthRequestManager.getInstance(application)
     val eventAlert = EventAlert()
+    private val networkManager = NetworkManager.getInstance(application)
+    private val authManager: AuthRequestManager = AuthRequestManager(application){
+        eventAlert.setEvent(Event.ERROR)
+    }
 
     fun dropDrink(drink: Drink){
         val handler = object: ResponseHandler() {

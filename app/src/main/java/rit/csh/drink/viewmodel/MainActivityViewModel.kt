@@ -7,6 +7,10 @@ import android.graphics.drawable.Drawable
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import rit.csh.drink.model.*
+import rit.csh.drink.model.drink.DrinkRepository
+import rit.csh.drink.model.drink.DrinkRoomDatabase
+import rit.csh.drink.model.drink.MachineWithDrinks
+import rit.csh.drink.model.user.ProfileImageRepository
 
 class MainActivityViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -21,7 +25,8 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
     init {
         val drinkDao = DrinkRoomDatabase.getDatabase(application).drinkDao()
         drinkRepository = DrinkRepository(drinkDao)
-        profileImageRepository = ProfileImageRepository(application)
+        profileImageRepository =
+            ProfileImageRepository(application)
         prefs = application.getSharedPreferences("auth", Context.MODE_PRIVATE)
 
         machinesWithDrinks = drinkRepository.machines

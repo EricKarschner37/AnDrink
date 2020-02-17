@@ -1,4 +1,4 @@
-package rit.csh.drink.model
+package rit.csh.drink.model.drink
 
 import androidx.room.Embedded
 import androidx.room.Entity

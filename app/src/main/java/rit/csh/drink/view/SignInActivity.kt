@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import androidx.core.net.toUri
 import kotlinx.android.synthetic.main.activity_sign_in_failed.*
 import net.openid.appauth.*
@@ -32,14 +33,14 @@ class SignInActivity : AppCompatActivity() {
         }
     }
 
-    private fun authenticate(){
+    private fun authenticate() {
         val issuerUri = Uri.parse("https://sso.csh.rit.edu/auth/realms/csh")
         AuthorizationServiceConfiguration.fetchFromIssuer(issuerUri) { result, ex ->
             ex?.let {
                 Log.w(TAG, "Failed to retrieve configuration", ex)
             }
 
-            result?.let{
+            result?.let {
                 val req = AuthorizationRequest.Builder(
                     result,
                     "AnDrink",
@@ -55,7 +56,7 @@ class SignInActivity : AppCompatActivity() {
                 val authIntent = authService.getAuthorizationRequestIntent(req)
                 startActivityForResult(authIntent, RC_AUTH)
             }
-            if (result == null){
+            if (result == null) {
                 showLoginFailed()
             }
         }
@@ -69,7 +70,7 @@ class SignInActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleAuthorizationResponse(intent: Intent){
+    private fun handleAuthorizationResponse(intent: Intent) {
         val response = AuthorizationResponse.fromIntent(intent)
         val error = AuthorizationException.fromIntent(intent)
 
@@ -100,18 +101,22 @@ class SignInActivity : AppCompatActivity() {
             .apply()
     }
 
-    private fun launchRefreshActivity(){
+    private fun launchRefreshActivity() {
         val intent = Intent(this, RefreshActivity::class.java)
         startActivity(intent)
-        authService.dispose()
         finish()
     }
 
-    private fun showLoginFailed(){
+    private fun showLoginFailed() {
         setContentView(R.layout.activity_sign_in_failed)
-        sign_in_btn.setOnClickListener {
+        findViewById<Button>(R.id.sign_in_btn).setOnClickListener {
             startActivity(intent)
             finish()
         }
+    }
+
+    override fun onDestroy() {
+        authService.dispose()
+        super.onDestroy()
     }
 }

@@ -1,4 +1,4 @@
-package rit.csh.drink.model
+package rit.csh.drink.model.drink
 
 import android.os.Parcelable
 import androidx.room.ColumnInfo

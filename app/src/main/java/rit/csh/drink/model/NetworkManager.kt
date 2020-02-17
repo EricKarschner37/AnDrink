@@ -10,6 +10,7 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.CancellableRequest
 import com.github.kittinunf.result.Result
 import org.json.JSONObject
+import rit.csh.drink.model.drink.Drink
 
 class NetworkManager private constructor(context: Context){
     private val TAG = "NetworkManager"
@@ -24,11 +25,13 @@ class NetworkManager private constructor(context: Context){
         return Fuel.get(url)
             .authentication()
             .bearer(token)
+            .timeout(5000)
             .responseString { request, response, result ->
                 when (result) {
                     is Result.Failure -> {
                         val ex = result.getException()
                         Log.e(TAG, ex.message ?: "There was an issue with retrieving the drinks")
+                        handler.onFailure(ex)
                     }
                     is Result.Success -> {
                         val jsonResponse = JSONObject(String(response.data))
@@ -52,6 +55,7 @@ class NetworkManager private constructor(context: Context){
             .jsonBody(jsonBody.toString())
             .authentication()
             .bearer(token)
+            .timeout(5000)
             .responseString { request, response, result ->
                 when (result){
                     is Result.Failure-> {
@@ -74,6 +78,7 @@ class NetworkManager private constructor(context: Context){
         return Fuel.get(url)
             .authentication()
             .bearer(token)
+            .timeout(5000)
             .responseString { request, response, result ->
                 when (result) {
                     is Result.Failure -> {
@@ -95,6 +100,7 @@ class NetworkManager private constructor(context: Context){
         return Fuel.get(endPoint.toString())
             .authentication()
             .bearer(token)
+            .timeout(5000)
             .responseString { request, response, result ->
                 when (result){
                     is Result.Failure -> {

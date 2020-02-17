@@ -16,7 +16,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.nav_header.*
 import org.jetbrains.anko.*
 import rit.csh.drink.R
-import rit.csh.drink.model.Drink
+import rit.csh.drink.model.drink.Drink
 import rit.csh.drink.viewmodel.MainActivityViewModel
 
 class MainActivity : AppCompatActivity() {

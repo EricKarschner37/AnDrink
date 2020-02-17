@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.drink_item.view.*
 import rit.csh.drink.R
-import rit.csh.drink.model.Drink
+import rit.csh.drink.model.drink.Drink
 
 class DrinkAdapter internal constructor(private val context: Context, private val onDrinkClicked: (Drink) -> Unit) : RecyclerView.Adapter<DrinkAdapter.ViewHolder>() {
 

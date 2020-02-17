@@ -1,4 +1,6 @@
-package rit.csh.drink.model
+package rit.csh.drink.model.drink
+
+import rit.csh.drink.model.User
 
 class DrinkRepository(private val drinkDao: DrinkDao) {
 
