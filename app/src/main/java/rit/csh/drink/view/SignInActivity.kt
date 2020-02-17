@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.core.net.toUri
+import kotlinx.android.synthetic.main.activity_sign_in_failed.*
 import net.openid.appauth.*
 import rit.csh.drink.R
 
@@ -38,20 +39,25 @@ class SignInActivity : AppCompatActivity() {
                 Log.w(TAG, "Failed to retrieve configuration", ex)
             }
 
-            val req = AuthorizationRequest.Builder(
-                result!!,
-                "AnDrink",
-                ResponseTypeValues.CODE,
-                "drink://redirect".toUri()
-            ).setScopes(
-                "openid",
-                "offline_access",
-                "profile",
-                "drink_balance"
-            ).setPrompt("login").build()
+            result?.let{
+                val req = AuthorizationRequest.Builder(
+                    result,
+                    "AnDrink",
+                    ResponseTypeValues.CODE,
+                    "drink://redirect".toUri()
+                ).setScopes(
+                    "openid",
+                    "offline_access",
+                    "profile",
+                    "drink_balance"
+                ).setPrompt("login").build()
 
-            val authIntent = authService.getAuthorizationRequestIntent(req)
-            startActivityForResult(authIntent, RC_AUTH)
+                val authIntent = authService.getAuthorizationRequestIntent(req)
+                startActivityForResult(authIntent, RC_AUTH)
+            }
+            if (result == null){
+                showLoginFailed()
+            }
         }
     }
 
@@ -99,5 +105,13 @@ class SignInActivity : AppCompatActivity() {
         startActivity(intent)
         authService.dispose()
         finish()
+    }
+
+    private fun showLoginFailed(){
+        setContentView(R.layout.activity_sign_in_failed)
+        sign_in_btn.setOnClickListener {
+            startActivity(intent)
+            finish()
+        }
     }
 }
