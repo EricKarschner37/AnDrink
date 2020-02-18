@@ -40,6 +40,7 @@ class RefreshActivityViewModel(application: Application): AndroidViewModel(appli
             }
 
             override fun onFailure(error: FuelError) {
+                eventAlert.setEvent(Event.ERROR)
                 Log.e(TAG, error.message ?: "Something went wrong retrieving the user's credits")
             }
         }
@@ -52,6 +53,7 @@ class RefreshActivityViewModel(application: Application): AndroidViewModel(appli
                 }
 
                 override fun onFailure(error: FuelError) {
+                    eventAlert.setEvent(Event.ERROR)
                     Log.e(TAG, error.message ?: "Something went wrong retrieving the user id")
                 }
             }
@@ -71,6 +73,7 @@ class RefreshActivityViewModel(application: Application): AndroidViewModel(appli
             }
 
             override fun onFailure(error: FuelError) {
+                eventAlert.setEvent(Event.ERROR)
                 Log.i(TAG, error.message ?: "Something went wrong retrieving stock information")
             }
         }

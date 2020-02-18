@@ -60,6 +60,7 @@ class MainActivity : AppCompatActivity() {
     private fun refresh(){
         val intent = Intent(this, RefreshActivity::class.java)
         startActivity(intent)
+        finish()
     }
 
     private fun verifyCanDropDrink(drink: Drink){
