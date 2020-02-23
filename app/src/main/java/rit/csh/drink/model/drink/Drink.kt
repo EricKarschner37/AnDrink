@@ -16,7 +16,7 @@ data class Drink(
     @ColumnInfo(name="slot") val slot: Int,
     @ColumnInfo(name="isStocked") val isActive: Boolean,
     @ColumnInfo(name="machine") val machine: String
-): Parcelable{
+): Parcelable, Comparable<Drink>{
 
     companion object {
 
@@ -39,4 +39,6 @@ data class Drink(
             return drinks
         }
     }
+
+    override fun compareTo(other: Drink) = slot - other.slot
 }

@@ -20,6 +20,12 @@ interface DrinkDao {
     @Query("DELETE FROM Drink")
     suspend fun deleteDrinks()
 
+    @Transaction
+    suspend fun deleteAll(){
+        deleteMachines()
+        deleteDrinks()
+    }
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(vararg drinks: Drink)
 

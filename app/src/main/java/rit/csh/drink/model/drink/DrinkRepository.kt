@@ -21,7 +21,6 @@ class DrinkRepository(private val drinkDao: DrinkDao) {
     }
 
     suspend fun deleteAll() {
-        drinkDao.deleteDrinks()
-        drinkDao.deleteMachines()
+        drinkDao.deleteAll()
     }
 }
